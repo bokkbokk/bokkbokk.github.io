@@ -1,4 +1,4 @@
-## About me                                                       [Projects](Projects/Projects.md)
+## About me                                                       [Projects](Projects.html)
 
 
 - I’m bokkbokk
