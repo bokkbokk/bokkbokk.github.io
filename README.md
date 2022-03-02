@@ -1,4 +1,4 @@
-## About me                                                       [Projects](www.google.com)
+## About me                                                       [Projects](Projects)
 
 
 - I’m bokkbokk
