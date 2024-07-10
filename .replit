@@ -1,0 +1,9 @@
+modules = ["web"]
+entrypoint = "index.html"
+
+[nix]
+channel = "stable-24_05"
+
+[[ports]]
+localPort = 10
+externalPort = 80
