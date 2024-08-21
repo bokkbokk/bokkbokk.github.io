@@ -1,0 +1,219 @@
+<html><head><base href="https://websimuniverse.com/voroni-textures-interactive/">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interactive Voronoi Textures with Dragging and Parts Control</title>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+  }
+  #canvas {
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+  }
+  #controls {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    background: rgba(255,255,255,0.7);
+    padding: 10px;
+    border-radius: 20px;
+  }
+  button {
+    padding: 10px 15px;
+    font-size: 16px;
+    border: none;
+    background: #333;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  #sliderContainer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  #partsSlider {
+    width: 200px;
+  }
+</style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<div id="controls">
+  <button id="regenerate">Regenerate</button>
+  <button id="changeColor">Change Color</button>
+  <button id="toggleMovement">Toggle Movement</button>
+  <div id="sliderContainer">
+    <label for="partsSlider">Parts:</label>
+    <input type="range" id="partsSlider" min="10" max="1000" value="100">
+    <span id="partsValue">100</span>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.4/d3.min.js"></script>
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let width, height;
+
+function resizeCanvas() {
+  width = window.innerWidth;
+  height = window.innerHeight;
+  canvas.width = width;
+  canvas.height = height;
+}
+
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+let sites = [];
+let voronoi;
+let color = d3.interpolateRainbow;
+let isMoving = false;
+let numParts = 100;
+
+function generateSites() {
+  sites = d3.range(numParts).map(() => ({
+    x: Math.random() * width,
+    y: Math.random() * height,
+    vx: (Math.random() - 0.5) * 2,
+    vy: (Math.random() - 0.5) * 2
+  }));
+  updateVoronoi();
+}
+
+function updateVoronoi() {
+  voronoi = d3.Delaunay.from(sites, d => d.x, d => d.y).voronoi([0, 0, width, height]);
+}
+
+function draw() {
+  ctx.clearRect(0, 0, width, height);
+  
+  for (let i = 0; i < sites.length; i++) {
+    const cell = voronoi.cellPolygon(i);
+    if (cell) {
+      ctx.beginPath();
+      ctx.moveTo(cell[0][0], cell[0][1]);
+      for (let j = 1; j < cell.length; j++) {
+        ctx.lineTo(cell[j][0], cell[j][1]);
+      }
+      ctx.closePath();
+      ctx.fillStyle = color(i / sites.length);
+      ctx.fill();
+    }
+  }
+}
+
+function moveSites() {
+  sites.forEach(site => {
+    site.x += site.vx;
+    site.y += site.vy;
+
+    if (site.x < 0 || site.x > width) site.vx *= -1;
+    if (site.y < 0 || site.y > height) site.vy *= -1;
+
+    site.x = Math.max(0, Math.min(width, site.x));
+    site.y = Math.max(0, Math.min(height, site.y));
+  });
+
+  updateVoronoi();
+}
+
+function animate() {
+  if (isMoving) {
+    moveSites();
+  }
+  draw();
+  requestAnimationFrame(animate);
+}
+
+generateSites();
+animate();
+
+document.getElementById('regenerate').addEventListener('click', generateSites);
+
+document.getElementById('changeColor').addEventListener('click', () => {
+  color = d3[`interpolate${['Viridis', 'Magma', 'Inferno', 'Plasma', 'Warm', 'Cool'][Math.floor(Math.random() * 6)]}`];
+});
+
+document.getElementById('toggleMovement').addEventListener('click', () => {
+  isMoving = !isMoving;
+});
+
+const partsSlider = document.getElementById('partsSlider');
+const partsValue = document.getElementById('partsValue');
+
+partsSlider.addEventListener('input', () => {
+  numParts = parseInt(partsSlider.value);
+  partsValue.textContent = numParts;
+  generateSites();
+});
+
+let isDrawing = false;
+let lastPoint;
+
+function handleStart(event) {
+  isDrawing = true;
+  const point = getPoint(event);
+  lastPoint = point;
+}
+
+function handleMove(event) {
+  if (!isDrawing) return;
+  const point = getPoint(event);
+  const dx = point[0] - lastPoint[0];
+  const dy = point[1] - lastPoint[1];
+  
+  sites = sites.map(site => {
+    const distX = site.x - point[0];
+    const distY = site.y - point[1];
+    const dist = Math.sqrt(distX * distX + distY * distY);
+    const force = Math.max(0, 1 - dist / 100);
+    
+    return {
+      ...site,
+      x: site.x + dx * force,
+      y: site.y + dy * force
+    };
+  });
+  
+  updateVoronoi();
+  lastPoint = point;
+}
+
+function handleEnd() {
+  isDrawing = false;
+}
+
+function getPoint(event) {
+  const rect = canvas.getBoundingClientRect();
+  const x = event.clientX - rect.left;
+  const y = event.clientY - rect.top;
+  return [x, y];
+}
+
+canvas.addEventListener('mousedown', handleStart);
+canvas.addEventListener('mousemove', handleMove);
+canvas.addEventListener('mouseup', handleEnd);
+canvas.addEventListener('touchstart', e => {
+  e.preventDefault();
+  handleStart(e.touches[0]);
+});
+canvas.addEventListener('touchmove', e => {
+  e.preventDefault();
+  handleMove(e.touches[0]);
+});
+canvas.addEventListener('touchend', handleEnd);
+</script>
+</body></html>
