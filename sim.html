@@ -1,21 +1,59 @@
-<html><head><base href="https://interactive-web-simulation.example.com/particle-web/">
-<title>Embeddable Particle Web Simulation with Slow Twinkling Stars</title>
-<style>
-    body, html {
-        margin: 0;
-        padding: 0;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        background-color: rgb(61,68,53);
-    }
-    canvas {
-        display: block;
-    }
-</style>
+<html>
+<head>
+    <base href="https://interactive-web-simulation.example.com/particle-web/">
+    <title>Embeddable Particle Web Simulation with Slow Twinkling Stars</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: rgb(61,68,53);
+        }
+        canvas {
+            display: block;
+        }
+        .controls {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+            color: white;
+            z-index: 10;
+        }
+        .controls label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .controls input, .controls select {
+            margin-bottom: 10px;
+            width: 100%;
+        }
+    </style>
 </head>
 <body>
 <canvas id="particleCanvas"></canvas>
+
+<div class="controls">
+    <label for="particleCount">Particle Count</label>
+    <input type="range" id="particleCount" min="100" max="2000" value="1150">
+    
+    <label for="particleSize">Particle Size</label>
+    <input type="range" id="particleSize" min="1" max="5" value="2">
+    
+    <label for="mouseRadius">Mouse Radius</label>
+    <input type="range" id="mouseRadius" min="50" max="300" value="130">
+    
+    <label for="interactionMode">Interaction Mode</label>
+    <select id="interactionMode">
+        <option value="repel">Repel</option>
+        <option value="attract">Attract</option>
+        <option value="cut">Cut</option>
+    </select>
+</div>
 
 <script>
 const canvas = document.getElementById('particleCanvas');
@@ -165,5 +203,26 @@ window.addEventListener('resize', function() {
     resizeCanvas();
     init();
 });
+
+// Add event listeners to sliders
+document.getElementById('particleCount').addEventListener('input', function() {
+    config.particleCount = this.value;
+    init();
+});
+
+document.getElementById('particleSize').addEventListener('input', function() {
+    config.particleSize = this.value;
+});
+
+document.getElementById('mouseRadius').addEventListener('input', function() {
+    config.mouseRadius = this.value;
+    mouse.radius = this.value;
+});
+
+document.getElementById('interactionMode').addEventListener('change', function() {
+    config.interactionMode = this.value;
+});
+
 </script>
-</body></html>
+</body>
+</html>
