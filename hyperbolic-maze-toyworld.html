@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+
+<meta charset="utf-8" />
+
+<title>Hyperbolic maze</title>
+
+<style type="text/css">
+/* <![CDATA[ */
+#canvas { float: left; margin-right: 1em; margin-bottom: 1em; }
+#please-wait { font-weight: bolder; }
+#explanations { clear: left; display: none; }
+.sidenote { font-size: .83em; }
+address { text-align: right; }
+/* ]]> */
+</style>
+
+</head>
+
+
+<body>
+
+<canvas id="canvas" width="600" height="600">
+</canvas>
+
+<h1>Hyperbolic maze (toy version)</h1>
+
+<p id="please-wait">Please stand by while the maze is being constructed…</p>
+
+<p>Move with arrow keys and insert/delete.  (Also F1 to recenter.)
+Or click in the direction in which you want to move.</p>
+
+<p>Projection: <select id="projection-sel">
+<option value="0">Poincaré disk</option>
+<option value="1">Beltrami-Klein</option>
+</select></p>
+
+<p id="maze-info"></p>
+
+<p id="goal"></p>
+
+<p>Visited: <span id="visited">?</span></p>
+
+<p>Steps to starting point: <span id="distance-start">?</span>; to
+green point: <span id="distance-green">?</span> ←but using this info
+is considered cheating!</p>
+
+<p><a id="show-explanations" href="hyperbolic-maze-toyworld.html#explanations">Show/hide
+mathematical explanations</a></p>
+
+<script type="text/javascript">
+
+// <![CDATA[
+
+"use strict";
+
+//// All of the following code was written by David A. Madore
+////   (<URL: http://www.madore.org/~david/ >),
+//// around 2013-11-28, and is hereby placed in the Public Domain.
+////   (I would appreciate getting some thanks/recognition if it
+////   is used elsewhere, but this is not a legal requirement,
+////   just a polite request.)
+//// It comes with no warranty whatsoever, of course.
+
+// The Möbius transformations z -> (a*z + b)/(c*z + d) is represented
+// as an array of 4 values: Re(a), Im(a), Re(b), Im(b); we normalize
+// a*d-b*c=1 (note that there are still two equivalent representations
+// of each, up to a global sign), and d and c are the conjugates of a
+// and b respectively because we always preserve the unit circle.
+var moebius_idn = [1,0,0,0];  // Identity matrix
+var sqrt_half = Math.sqrt(2)/2;
+var moebius_rot1 = [sqrt_half,sqrt_half,0,0];  // Hyperbolic rotation (R^4 = 1)
+var moebius_rot2 = [0,1,0,0];  // R^2
+var moebius_rot3 = [sqrt_half,-sqrt_half,0,0];  // R^3
+// c ≈ 0.53063753095251782602 is the shortest side of the hyperbolic
+// triangle with angles α=π/2, β=π/4 and γ=π/5.  So it is the distance
+// between the center of one of the square tiles and the middle of one
+// of its edges.
+var cosh_c = 1.1441228056353685952001455671606041530723067536755;  // Root of x^4 - (3/2)*x^2 + 1/4
+var sinh_c = 0.55589297025142117199204804789756925069105781499704;  // Root of x^4 + (1/2)*x^2 - 1/4
+var moebius_trn = [cosh_c, 0, sinh_c, 0];  // Hyperbolic translation ((R*T)^5 = 1)
+var moebius_tflip = [0, cosh_c, 0, -sinh_c];  // T*R^2
+var cosh_half_c = 1.0354039804915201781233643210826166065182504353703;
+var sinh_half_c = 0.26844255031139213493372738763232094175487323371651;
+var tanh_half_c = 0.25926358732362497806075346395619478291118511605261;
+var moebius_half_trn = [cosh_half_c, 0, sinh_half_c, 0];
+
+// b ≈ 0.62686966290617781414 is another side of the same hyperbolic
+// triangle.  So it is the half-length of one of the edges.
+var tanh_half_b = 0.30355865872664673034932858948334224296408522601051;
+
+// The symmetric group on 5 elements, which is our maze group in this
+// toy version: its elements are numbered in lexicographic order.
+
+// Note that this numbering is used for the edges (walls or absence
+// thereof) of the maze (and, up to a R factor, for the cells).
+
+var group_size = 120;
+var maxsize = group_size;
+
+var bootstraps = [  // Multiplication for generators of S_5
+    [  1, 0, 3, 2, 5, 4, 7, 6, 9, 8,
+       11, 10, 13, 12, 15, 14, 17, 16, 19, 18,
+       21, 20, 23, 22, 25, 24, 27, 26, 29, 28,
+       31, 30, 33, 32, 35, 34, 37, 36, 39, 38,
+       41, 40, 43, 42, 45, 44, 47, 46, 49, 48,
+       51, 50, 53, 52, 55, 54, 57, 56, 59, 58,
+       61, 60, 63, 62, 65, 64, 67, 66, 69, 68,
+       71, 70, 73, 72, 75, 74, 77, 76, 79, 78,
+       81, 80, 83, 82, 85, 84, 87, 86, 89, 88,
+       91, 90, 93, 92, 95, 94, 97, 96, 99, 98,
+       101, 100, 103, 102, 105, 104, 107, 106, 109, 108,
+       111, 110, 113, 112, 115, 114, 117, 116, 119, 118 ],
+    [  33, 35, 39, 41, 45, 47, 57, 59, 63, 65,
+       69, 71, 81, 83, 87, 89, 93, 95, 105, 107,
+       111, 113, 117, 119, 9, 11, 15, 17, 21, 23,
+       51, 53, 61, 64, 67, 70, 75, 77, 85, 88,
+       91, 94, 99, 101, 109, 112, 115, 118, 3, 5,
+       13, 16, 19, 22, 27, 29, 37, 40, 43, 46,
+       73, 76, 79, 82, 90, 92, 97, 100, 103, 106,
+       114, 116, 1, 4, 7, 10, 18, 20, 25, 28,
+       31, 34, 42, 44, 49, 52, 55, 58, 66, 68,
+       96, 98, 102, 104, 108, 110, 0, 2, 6, 8,
+       12, 14, 24, 26, 30, 32, 36, 38, 48, 50,
+       54, 56, 60, 62, 72, 74, 78, 80, 84, 86 ]
+];
+
+var multiply;  // Multiplication table of S_5
+var inverse;   // Inverse table of S_5
+
+function compute_multiply () {
+    "use strict";
+    // Compute the multiplication and inverse table from the bootstraps.
+    var redo;
+    var done = new Array(group_size);
+    for ( var i=0 ; i<group_size ; i++ )
+        done[i] = 0;
+    multiply = new Array(group_size);
+    for ( var i=0 ; i<group_size ; i++ )
+        multiply[i] = new Array(group_size);
+    for ( var i=0 ; i<group_size ; i++ )
+        multiply[0][i] = i;
+    inverse = new Array(group_size);
+    inverse[0] = 0;
+    done[0] = 1;
+    redo = 1;
+    while ( redo ) {
+        redo = 0;
+        for ( var i=0 ; i<group_size ; i++ ) {
+            if ( done[i] ) {
+                for ( var s=0 ; s<bootstraps.length ; s++ ) {
+                    var j = bootstraps[s][i];
+                    if ( ! done[j] ) {
+                        redo = 1;
+                        done[j] = 1;
+                        for ( var k=0 ; k<group_size ; k++ ) {
+                            multiply[j][k] = bootstraps[s][multiply[i][k]];
+                            if ( multiply[j][k] == 0 )
+                                inverse[j] = k;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+compute_multiply();
+
+// Each maze cell is represented by four different elements of
+// S_5 (one for each wall of the cell), and each maze wall by
+// two different elements (one for each side of the wall, i.e.,
+// adjacent cell).
+
+var s5_idn = 0;  // Identity
+var s5_rot1 = 32;  // Hyperbolic rotation (R^4 = 1)
+var s5_rot2 = 60;  // R^2
+var s5_rot3 = 72;  // R^3
+var s5_trn = 66;  // Hyperbolic translation ((R*T)^5 = 1)
+var s5_tflip = 21;  // T*R^2
+
+// The prime was chosen so as to split the minimal polynomials of
+// cosh_c and sinh_c and also x^4 + 1.
+
+// The matrix [[a,b],[c,d]] of PGL(F_q) is represented as the integer
+// a*q^3 + b*q^2 + c*q + d with normalization being such that the
+// first nonzero coefficient is one (so maximal value = 2*q^3).
+
+var qrime = 401;
+var qrime2 = qrime*qrime;
+var qrime3 = qrime2*qrime;
+var pgl_fq_idn = 64481202;  // Identity matrix
+var pgl_fq_rot1 = 64481582;  // Hyperbolic rotation (R^4 = 1)
+var pgl_fq_rot2 = 64481601;  // R^2
+var pgl_fq_rot3 = 64481221;  // R^3
+var pgl_fq_trn = 112841802;  // Hyperbolic translation ((R*T)^5 = 1)
+var pgl_fq_tflip = 80842802;  // T*R^2
+
+var fq_inverses = new Array(qrime);
+function compute_fq_inverses() {
+    "use strict";
+    // Do a stupid quadratic search because prime is small and that
+    // is easier to write. :-/
+    for ( var i=1 ; i<qrime ; i++ ) {
+        for ( var j=1 ; j<qrime ; j++ ) {
+            if ( (i*j)%qrime == 1 )
+                fq_inverses[i] = j;
+        }
+    }
+}
+compute_fq_inverses();
+
+function moebius_product (m1, m2, m) {
+    "use strict";
+    // Compute the product of two Möbius transformations.  Store the
+    // result in m, or allocate a new value if no m is provided.
+    if ( typeof(m) == "undefined" )
+        m = new Array(4);
+    m[0] = (m1[0]*m2[0] - m1[1]*m2[1] + m1[2]*m2[2] + m1[3]*m2[3]);
+    m[1] = (m1[0]*m2[1] + m1[1]*m2[0] - m1[2]*m2[3] + m1[3]*m2[2]);
+    m[2] = (m1[0]*m2[2] - m1[1]*m2[3] + m1[2]*m2[0] + m1[3]*m2[1]);
+    m[3] = (m1[0]*m2[3] + m1[1]*m2[2] - m1[2]*m2[1] + m1[3]*m2[0]);
+    return m;
+}
+
+function moebius_inverse (m) {
+    "use strict";
+    // Compute the inverse of a Möbius transformation.
+    return [m[0], -m[1], -m[2], -m[3]];
+}
+
+function moebius_apply (m, z) {
+    "use strict";
+    // Apply a Möbius transformation to a complex z.
+    var numer0 = m[0]*z[0] - m[1]*z[1] + m[2];
+    var numer1 = m[0]*z[1] + m[1]*z[0] + m[3];
+    var denom0 = m[2]*z[0] + m[3]*z[1] + m[0];
+    var denom1 = m[2]*z[1] - m[3]*z[0] - m[1];
+    var denom_norm = denom0*denom0 + denom1*denom1;
+    return [(numer0*denom0+numer1*denom1)/denom_norm,
+            (-numer0*denom1+numer1*denom0)/denom_norm];
+}
+
+function moebius_diff (m, z) {
+    "use strict";
+    // Compute the differential of a Möbius transformation at z.
+    var denom0 = m[2]*z[0] + m[3]*z[1] + m[0];
+    var denom1 = m[2]*z[1] - m[3]*z[0] - m[1];
+    var denom_norm = denom0*denom0 + denom1*denom1;
+    return [(denom0*denom0-denom1*denom1)/(denom_norm*denom_norm),
+            -(2*denom0*denom1)/(denom_norm*denom_norm)];
+}
+
+function moebius_renormalize (m) {
+    "use strict";
+    // Enforce the determinant of m to be 1 (for numeric stability).
+    var det = m[0]*m[0] + m[1]*m[1] - m[2]*m[2] - m[3]*m[3];
+    var nr = 1/Math.sqrt(det);
+    for ( var i=0 ; i<4 ; i++ )
+        m[i] *= nr;
+}
+
+function pgl_fq_product (m1, m2) {
+    "use strict";
+    // Compute the product of two elements of PGL_2(F_q).
+    m1 = m1|0;  m2 = m2|0;
+    var m1a = (m1/qrime3)|0;
+    var m1b = ((m1/qrime2)|0)%qrime;
+    var m1c = ((m1/qrime)|0)%qrime;
+    var m1d = m1%qrime;
+    var m2a = (m2/qrime3)|0;
+    var m2b = ((m2/qrime2)|0)%qrime;
+    var m2c = ((m2/qrime)|0)%qrime;
+    var m2d = m2%qrime;
+    var ma = (m1a*m2a + m1b*m2c) % qrime;
+    var mb = (m1a*m2b + m1b*m2d) % qrime;
+    var mc = (m1c*m2a + m1d*m2c) % qrime;
+    var md = (m1c*m2b + m1d*m2d) % qrime;
+    if ( ma != 0 ) {
+        mb = (mb * fq_inverses[ma]) % qrime;
+        mc = (mc * fq_inverses[ma]) % qrime;
+        md = (md * fq_inverses[ma]) % qrime;
+        ma = 1;
+    } else if ( mb != 0 ) {
+        mc = (mc * fq_inverses[mb]) % qrime;
+        md = (md * fq_inverses[mb]) % qrime;
+        mb = 1;
+    } else
+        throw new Error("This is impossible");
+    return ma*qrime3 + mb*qrime2 + mc*qrime + md;
+}
+
+// The maze is indexed by elements of S_5 (numbered as
+// explained above).  A value of 1 indicates no wall, while 0
+// indicates a wall.
+var maze;
+var walls_removed;
+
+function produce_maze () {
+    "use strict";
+    // Generate the maze.
+    var connected;  // What has been connected so far.
+    var connected_size = 0;
+    walls_removed = 0;
+    var queue;  // Queue of walls to consider removing.
+    var qlen, q;  // End and start of queue.
+    if ( typeof(Uint8Array) == "function" ) {
+        maze = new Uint8Array(maxsize);
+        connected = new Uint8Array(maxsize);
+    } else {
+        maze = new Array(maxsize);
+        connected = new Uint8Array(maxsize);
+    }
+    if ( typeof(Int32Array) == "function" )
+        queue = new Int32Array(maxsize);
+    else
+        queue = new Array(maxsize);
+    var i;
+    // Start digging in a random location.
+    i = Math.floor(Math.random()*maxsize);
+    connected[i] = 1;
+    connected[multiply[i][s5_rot1]] = 1;
+    connected[multiply[i][s5_rot2]] = 1;
+    connected[multiply[i][s5_rot3]] = 1;
+    connected_size = 4;
+    qlen = 0;
+    queue[qlen++] = i;
+    queue[qlen++] = multiply[i][s5_rot1];
+    queue[qlen++] = multiply[i][s5_rot2];
+    queue[qlen++] = multiply[i][s5_rot3];
+    q = 0;
+    while ( q < qlen ) {
+        // Remove a random item from the queue.
+        var qrnd = q + Math.floor(Math.random()*(qlen-q));
+        var i = queue[qrnd];
+        queue[qrnd] = queue[q++];
+        var j0 = multiply[i][s5_trn];
+        var j1 = multiply[j0][s5_rot1];
+        var j2 = multiply[j1][s5_rot1];
+        var j3 = multiply[j2][s5_rot1];
+        if ( ! connected[j2] ) {
+            // Remove this wall.  Add the three next ones to the
+            // queue.
+            maze[i] = 1;
+            maze[j2] = 1;
+            walls_removed += 2;
+            connected[j0] = 1;
+            connected[j1] = 1;
+            connected[j2] = 1;
+            connected[j3] = 1;
+            connected_size += 4;
+            queue[qlen++] = j0;
+            queue[qlen++] = j1;
+            queue[qlen++] = j3;
+        }
+    }
+    // Now randomly remove some more walls.
+    for ( var i=0 ; i<maxsize ; i++ ) {
+        if ( connected[i] && Math.random() < 0.15 ) {
+            var j2 = multiply[i][s5_tflip];
+            if ( maze[i] == 0 ) {
+                maze[i] = 1;
+                maze[j2] = 1;
+                walls_removed += 2;
+            }
+        }
+    }
+}
+produce_maze();
+
+// Distances in the maze
+var distances0, distances1;
+// Distances in the lattice (ignoring maze walls)
+var sdistances0, sdistances1;
+// Furthest point from the origin
+var max_distance, farthest_point;
+
+function compute_distances (start, nowalls) {
+    "use strict";
+    var distances;
+    var max_distance;
+    // In contrast to produce_maze(), the queue enumerates items in
+    // order of distance from the starting location.
+    var queue;
+    var qlen, q;
+    if ( typeof(Int32Array) == "function" ) {
+        distances = new Int32Array(maxsize);
+        queue = new Int32Array(maxsize);
+    } else {
+        distances = new Array(maxsize);
+        queue = new Array(maxsize);
+    }
+    distances[start] = 1;
+    distances[multiply[start][s5_rot1]] = 1;
+    distances[multiply[start][s5_rot2]] = 1;
+    distances[multiply[start][s5_rot3]] = 1;
+    qlen = 0;
+    queue[qlen++] = start;
+    queue[qlen++] = multiply[start][s5_rot1];
+    queue[qlen++] = multiply[start][s5_rot2];
+    queue[qlen++] = multiply[start][s5_rot3];
+    q = 0;
+    while ( q < qlen ) {
+        // Remove the first item from the queue.
+        var i = queue[q++];
+        if ( nowalls || maze[i] ) {
+            var j0 = multiply[i][s5_trn];
+            var j1 = multiply[j0][s5_rot1];
+            var j2 = multiply[j1][s5_rot1];
+            var j3 = multiply[j2][s5_rot1];
+            if ( distances[j2] ) {
+                if ( distances[j2] > distances[i]+1 )
+                    throw new Error("This is impossible");
+            } else {
+                distances[j0] = distances[i]+1;
+                distances[j1] = distances[i]+1;
+                distances[j2] = distances[i]+1;
+                distances[j3] = distances[i]+1;
+                max_distance = distances[i]+1;
+                queue[qlen++] = j0;
+                queue[qlen++] = j1;
+                queue[qlen++] = j3;
+            }
+        }
+    }
+    return [distances, max_distance, queue[qlen-1]];
+}
+var tmp = compute_distances(s5_idn, false);
+distances0 = tmp[0];
+max_distance = tmp[1];
+farthest_point = tmp[2];
+distances1 = (compute_distances(farthest_point, false))[0];
+sdistances0 = (compute_distances(s5_idn, true))[0];
+sdistances1 = (compute_distances(farthest_point, true))[0];
+// (This is a bit wasteful, because
+// sdistances0[i] == sdistances1[multiply[farthest_point][i]]
+// but who cares.)
+
+// Return the "canonical" number of a maze cell.  By convention, we
+// choose whichever of the four rotations (walls) of it has the
+// smallest number in the numbering of S_5:
+function canon_num (i) { return Math.min(i, multiply[i][s5_rot1], multiply[i][s5_rot2], multiply[i][s5_rot3]); }
+
+// List of items to draw (items are both edges and circles/cells).
+// Each item is a 6-element list:
+// [0] is the Möbius transformation used to draw the item.
+// [1] is the corresponding element of S_5.
+// [2] is the corresponding element of PGL_2(F_q).
+// [3] is a boolean indicating whether this should be used to draw an
+//     edge (false means that the same edge is represented by the
+//     "other side" of the wall, i.e., the element times Tflip=T*R^2).
+// [4] is a boolean indicating whether this should be used to draw a
+//     circle/cell (false means that the same cell is not canonical,
+//     so it is represented by some other of the four products of this
+//     element by some power of R).
+// [5] is a boolean indicating whether this should also be drawn in
+//     the Beltrami-Klein model.
+
+var drawn_parts = [];
+var drawn_hash = {};
+
+function compute_drawn_parts () {
+    "use strict";
+    var queue = [[moebius_idn, s5_idn, pgl_fq_idn]];
+    while ( queue.length > 0 ) {
+        var p = queue.shift();
+        var cur = p[0];
+        var cur_s5 = p[1];
+        var cur_fq = p[2];
+        if ( ( typeof(drawn_hash[cur_fq]) == "undefined" ) && ( cur[0]*cur[0]+cur[1]*cur[1] < 50 ) ) {
+            var cur_rot1 = moebius_product(cur, moebius_rot1);
+            var cur_rot1_s5 = multiply[cur_s5][s5_rot1];
+            var cur_rot1_fq = pgl_fq_product(cur_fq, pgl_fq_rot1);
+            var cur_rot3 = moebius_product(cur, moebius_rot3);
+            var cur_rot3_s5 = multiply[cur_s5][s5_rot3];
+            var cur_rot3_fq = pgl_fq_product(cur_fq, pgl_fq_rot3);
+            var cur_trn = moebius_product(cur, moebius_trn);
+            var cur_trn_s5 = multiply[cur_s5][s5_trn];
+            var cur_trn_fq = pgl_fq_product(cur_fq, pgl_fq_trn);
+            var cur_tflip_s5 = multiply[cur_trn_s5][s5_rot2];
+            var cur_tflip_fq = pgl_fq_product(cur_trn_fq, pgl_fq_rot2);
+            // Check whether the edge is already being drawn from the other side
+            p.push(typeof(drawn_hash[cur_tflip_fq]) == "undefined");
+            // Check whether cur_s5 == canon_num(cur_s5)
+            p.push( cur_s5 < multiply[cur_s5][s5_rot1] && cur_s5 < multiply[cur_s5][s5_rot2] && cur_s5 < multiply[cur_s5][s5_rot3] );
+            p.push(cur[0]*cur[0]+cur[1]*cur[1] < 15);
+            // Register this drawn part.
+            drawn_hash[cur_fq] = drawn_parts.length;
+            drawn_parts.push(p);
+            queue.push([cur_rot1, cur_rot1_s5, cur_rot1_fq], [cur_rot3, cur_rot3_s5, cur_rot3_fq], [cur_trn, cur_trn_s5, cur_trn_fq]);
+        }
+    }
+}
+compute_drawn_parts();
+
+var visited;  // Which cells the user has visited
+if ( typeof(Uint8Array) == "function" )
+    visited = new Uint8Array(maxsize);
+else
+    visited = new Array(maxsize);
+var visited_count = 0;
+
+// Canvas and canvas drawing context
+var canvas;
+var ctx;
+
+function draw_hyperbolic_edge_poincare (m) {
+    "use strict";
+    // We approximate a hyperbolic edge by a Bézier curve (rather than
+    // an arc of circle).
+    var mm = moebius_product (m, moebius_half_trn);
+    var p0 = moebius_apply (mm, [0, tanh_half_b]);
+    var p1 = moebius_apply (mm, [0, -tanh_half_b]);
+    var pd0 = moebius_diff (mm, [0, tanh_half_b]);
+    var pd1 = moebius_diff (mm, [0, -tanh_half_b]);
+    var pdm = moebius_diff (mm, [0, 0]);
+    ctx.lineWidth = 0.012*Math.sqrt(pdm[0]*pdm[0] + pdm[1]*pdm[1]);
+    ctx.strokeStyle = "rgb(0,0,0)";
+    ctx.beginPath();
+    ctx.moveTo(p0[0], p0[1]);
+    ctx.bezierCurveTo(p0[0]+2*pd0[1]*tanh_half_b/3,
+                      p0[1]-2*pd0[0]*tanh_half_b/3,
+                      p1[0]-2*pd1[1]*tanh_half_b/3,
+                      p1[1]+2*pd1[0]*tanh_half_b/3,
+                      p1[0], p1[1]);
+    ctx.stroke();
+}
+
+function draw_hyperbolic_cell_poincare (m, m_s5) {
+    "use strict";
+    // Since the circle is centered at the origin before
+    // transformation, we can afford to use the exact formulæ for the
+    // transform of a circle by a Möbius transformation.
+    var cen0, cen1, radius, vradius;
+    function transform_circle (oradius) {
+        "use strict";
+        // (NB: oradius is tanh(r/2) where r is the true hyperbolic radius.)
+        var denom = m[0]*m[0] + m[1]*m[1] - (m[2]*m[2] + m[3]*m[3])*oradius*oradius;
+        cen0 = (m[2]*m[0] - m[3]*m[1] - (m[0]*m[2] - m[1]*m[3])*oradius*oradius) / denom;
+        cen1 = (m[3]*m[0] + m[2]*m[1] - (m[1]*m[2] + m[0]*m[3])*oradius*oradius) / denom;
+        radius = oradius / denom;
+        vradius = (m[0]*m[0] + m[1]*m[1] + (m[2]*m[2] + m[3]*m[3])*oradius*oradius)/(denom*denom);
+    }
+    var fblue = 1-(distances0[m_s5]-1)/(max_distance-1);
+    var fgreen = Math.max(0,1-(distances1[m_s5]-1)/(max_distance-1));
+    var fred = 1 - Math.max(fblue,fgreen);
+    var blue = (fblue*255) | 0;
+    var green = (fgreen*255) | 0;
+    var red = (fred*255) | 0;
+    ctx.fillStyle = "rgb("+red+","+green+","+blue+")";
+    ctx.beginPath();
+    transform_circle(0.05);
+    ctx.arc(cen0, cen1, radius, 0, 2*Math.PI, false);
+    ctx.fill();
+    if ( canon_num(m_s5) == canon_num(s5_idn) || canon_num(m_s5) == canon_num(farthest_point) ) {
+        ctx.strokeStyle = "rgb("+red+","+green+","+blue+")";
+        ctx.beginPath();
+        transform_circle(0.065);
+        ctx.lineWidth = 0.012*vradius;
+        ctx.arc(cen0, cen1, radius, 0, 2*Math.PI, false);
+        ctx.stroke();
+    } else if ( visited[m_s5] ) {
+        ctx.strokeStyle = "rgb(128,128,128)";
+        ctx.beginPath();
+        transform_circle(0.065);
+        ctx.lineWidth = 0.012*vradius;
+        ctx.arc(cen0, cen1, radius, 0, 2*Math.PI, false);
+        ctx.stroke();
+    }
+}
+
+function poincare_to_bk (p) {
+    "use strict";
+    // Convert from Poincaré to Beltrami-Klein coordinates.
+    var t = 1 + p[0]*p[0] + p[1]*p[1];
+    return [2*p[0]/t, 2*p[1]/t];
+}
+
+function poincare_to_bk_diff (p, dp) {
+    "use strict";
+    // Differential of the above
+    var t = 1 + p[0]*p[0] + p[1]*p[1];
+    var v = p[0]*dp[0] + p[1]*dp[1];
+    return [2*dp[0]/t - 2*v*p[0]/(t*t), 2*dp[1]/t - 2*v*p[1]/(t*t)];
+}
+
+function draw_hyperbolic_edge_bk (m) {
+    "use strict";
+    // Straight lines become straight lines in the Beltrami-Klein model.
+    var mm = moebius_product (m, moebius_half_trn);
+    var bk0a = poincare_to_bk (moebius_apply (mm, [0.006, tanh_half_b]));
+    var bk0b = poincare_to_bk (moebius_apply (mm, [-0.006, tanh_half_b]));
+    var bk1a = poincare_to_bk (moebius_apply (mm, [-0.006, -tanh_half_b]));
+    var bk1b = poincare_to_bk (moebius_apply (mm, [0.006, -tanh_half_b]));
+    ctx.fillStyle = "rgb(0,0,0)";
+    ctx.beginPath();
+    ctx.moveTo(bk0a[0], bk0a[1]);
+    ctx.lineTo(bk0b[0], bk0b[1]);
+    ctx.lineTo(bk1a[0], bk1a[1]);
+    ctx.lineTo(bk1b[0], bk1b[1]);
+    ctx.closePath();
+    ctx.fill();
+}
+
+function draw_hyperbolic_cell_bk (m, m_s5) {
+    "use strict";
+    var bkcen0, bkcen1, bkangle, bkmaj, bkmin;
+    function transform_circle (oradius) {
+        "use strict";
+        var denom = m[0]*m[0] + m[1]*m[1] - (m[2]*m[2] + m[3]*m[3])*oradius*oradius;
+        var pcen0 = (m[2]*m[0] - m[3]*m[1] - (m[0]*m[2] - m[1]*m[3])*oradius*oradius) / denom;
+        var pcen1 = (m[3]*m[0] + m[2]*m[1] - (m[1]*m[2] + m[0]*m[3])*oradius*oradius) / denom;
+        var pradius = oradius / denom;
+        var pcdst = Math.sqrt(pcen0*pcen0 + pcen1*pcen1);
+        var up0 = pcen0/pcdst;
+        var up1 = pcen1/pcdst;
+        if ( pcdst < 1.e-9 ) {
+            up0 = 1;  up1 = 0;
+        }
+        var bkfar = poincare_to_bk([pcen0 + pradius*up0, pcen1 + pradius*up1]);
+        var bknear = poincare_to_bk([pcen0 - pradius*up0, pcen1 - pradius*up1]);
+        var bkcen = [(bkfar[0]+bknear[0])/2, (bkfar[1]+bknear[1])/2];
+        bkcen0 = bkcen[0];  bkcen1 = bkcen[1];  // Center of the ellipse
+        bkangle = Math.atan2(pcen1, pcen0);  // Angle of minor axis
+        // Semi-minor axis:
+        bkmin = Math.sqrt((bkfar[0]-bkcen[0])*(bkfar[0]-bkcen[0])
+                          + (bkfar[1]-bkcen[1])*(bkfar[1]-bkcen[1]));
+        var bkaux = poincare_to_bk([pcen0 - pradius*up1, pcen1 + pradius*up0]);
+        var dpar = Math.abs((bkaux[0]-bkcen[0])*up0 + (bkaux[1]-bkcen[1])*up1);
+        var dort = Math.abs((bkaux[0]-bkcen[0])*up1 - (bkaux[1]-bkcen[1])*up0);
+        // Semi-major axis:
+        bkmaj = dort/Math.sqrt(1-(dpar/bkmin)*(dpar/bkmin));
+    }
+    var fblue = 1-(distances0[m_s5]-1)/(max_distance-1);
+    var fgreen = Math.max(0,1-(distances1[m_s5]-1)/(max_distance-1));
+    var fred = 1 - Math.max(fblue,fgreen);
+    var blue = (fblue*255) | 0;
+    var green = (fgreen*255) | 0;
+    var red = (fred*255) | 0;
+    ctx.fillStyle = "rgb("+red+","+green+","+blue+")";
+    ctx.beginPath();
+    transform_circle(0.05);
+    ctx.save();  ctx.translate(bkcen0, bkcen1);  ctx.rotate(bkangle);
+    ctx.scale(bkmin, bkmaj);  ctx.arc(0, 0, 1, 0, 2*Math.PI, false);
+    ctx.fill();  ctx.restore();
+    if ( canon_num(m_s5) == canon_num(s5_idn) || canon_num(m_s5) == canon_num(farthest_point) ) {
+        ctx.strokeStyle = "rgb("+red+","+green+","+blue+")";
+        ctx.beginPath();
+        transform_circle(0.065);
+        ctx.save();  ctx.translate(bkcen0, bkcen1);  ctx.rotate(bkangle);
+        ctx.scale(bkmin, bkmaj);  ctx.arc(0, 0, 1, 0, 2*Math.PI, false);
+        ctx.lineWidth = 0.012/0.065;
+        ctx.arc(0, 0, 1, 0, 2*Math.PI, false);
+        ctx.stroke();  ctx.restore();
+    } else if ( visited[m_s5] ) {
+        ctx.strokeStyle = "rgb(128,128,128)";
+        ctx.beginPath();
+        transform_circle(0.065);
+        ctx.save();  ctx.translate(bkcen0, bkcen1);  ctx.rotate(bkangle);
+        ctx.scale(bkmin, bkmaj);  ctx.arc(0, 0, 1, 0, 2*Math.PI, false);
+        ctx.lineWidth = 0.012/0.065;
+        ctx.arc(0, 0, 1, 0, 2*Math.PI, false);
+        ctx.stroke();  ctx.restore();
+    }
+}
+
+var using_bk;  // True if using Beltrami-Klein projection
+var draw_hyperbolic_edge;  // Either draw_hyperbolic_edge_poincare or _bk
+var draw_hyperbolic_cell;  // Either draw_hyperbolic_cell_poincare or _bk
+
+canvas = document.getElementById("canvas");
+if ( typeof(canvas.getContext) != "function" ) {
+    alert("Your browser does not support the HTML5 <canvas> element.\n"
+          + "This page will not function.");
+    throw new Error("Canvas unsupported");
+}
+ctx = canvas.getContext("2d");
+ctx.lineCap = "round";
+ctx.lineJoin = "round";
+var scale = Math.min(canvas.width/2, canvas.height/2) - 5;
+
+// The user's current position: as a Möbius transformation (which gets
+// regularly reduced by the lattice group), as an element of
+// S_5, and one of PSL_2(F_q) to check whether we've done a
+// loop.
+var current = moebius_idn;
+var current_s5 = s5_idn;
+var current_fq = pgl_fq_idn;
+
+// Instructions for the user:
+var achievement = 0;
+var goal1 = "Try to reach the green(est) circle.  (Or just explore around.)";
+var goal2 = "Now try to return to your starting point along a truly different route.  (Or just explore around.)";
+var goalf = "You won.  (Now you can just explore around.)";
+
+function write_string_in_id (id, str) {
+    "use strict";
+    // Write a string in a DOM node.
+    var node;
+    node = document.getElementById(id);
+    while ( node.firstChild )
+        node.removeChild(node.firstChild);
+    node.appendChild(document.createTextNode(str));
+}
+
+function did_move() {
+    "use strict";
+    // Update information when we changed cell.
+    if ( ! visited[current_s5] ) {
+        visited[current_s5] = 1;
+        visited[multiply[current_s5][s5_rot1]] = 1;
+        visited[multiply[current_s5][s5_rot2]] = 1;
+        visited[multiply[current_s5][s5_rot3]] = 1;
+        visited_count += 4;
+        write_string_in_id ("visited", (visited_count/4)
+                            +" cells ("
+                            +((visited_count/group_size)*100).toFixed(2)+"%)");
+    }
+    write_string_in_id ("distance-start",
+                        (distances0[current_s5]-1)+" ("
+                        +(sdistances0[current_s5]-1)+" ignoring walls)");
+    write_string_in_id ("distance-green",
+                        (distances1[current_s5]-1)+" ("
+                        +(sdistances1[current_s5]-1)+" ignoring walls)");
+    if ( achievement == 0 ) {
+        if ( canon_num(current_s5) == canon_num(s5_idn) )
+            write_string_in_id ("goal", "You are at the starting point.  "+goal1);
+        else if ( canon_num(current_s5) == canon_num(farthest_point) ) {
+            achievement = 1;
+            write_string_in_id ("goal", "Congratulations!  "+goal2);
+        } else
+            write_string_in_id ("goal", goal1);
+    } else if ( achievement == 1 ) {
+        if ( canon_num(current_s5) == canon_num(s5_idn) ) {
+            if ( current_fq == pgl_fq_idn
+                 || current_fq == pgl_fq_rot1
+                 || current_fq == pgl_fq_rot2
+                 || current_fq == pgl_fq_rot3 )
+                write_string_in_id ("goal", "You are back at the starting point.  "+goal2);
+            else {
+                achievement = 2;
+                write_string_in_id ("goal", "Congratulations!  "+goalf);
+            }
+        } else if ( canon_num(current_s5) == canon_num(farthest_point) ) {
+            write_string_in_id ("goal", "You are at the green circle.  "+goal2);
+        } else
+            write_string_in_id ("goal", goal2);
+    } else
+        write_string_in_id ("goal", goalf);
+}
+
+function draw_all() {
+    "use strict";
+    // Draw the canvas.
+    ctx.fillStyle = "rgb(128,128,128)";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.save();
+    ctx.translate(canvas.width/2, canvas.height/2);
+    ctx.scale(scale, scale);
+    ctx.rotate(-Math.PI/2);
+    ctx.fillStyle = "rgb(255,255,255)";
+    ctx.beginPath();
+    ctx.arc(0, 0, 1, 0, 2*Math.PI, false);
+    ctx.fill();
+    var trans = new Array(4);
+    var trans_s5;
+    for ( var i=0 ; i<drawn_parts.length ; i++ ) {
+        if ( ( drawn_parts[i][3] || drawn_parts[i][4] )
+             && ( drawn_parts[i][5] || ! using_bk ) ) {
+            trans_s5 = multiply[current_s5][drawn_parts[i][1]];
+            if ( drawn_parts[i][4] || ( drawn_parts[i][3] && maze[trans_s5] == 0 ) )
+                moebius_product(current, drawn_parts[i][0], trans);
+            if ( drawn_parts[i][3] && maze[trans_s5] == 0 )
+                draw_hyperbolic_edge(trans);
+            if ( drawn_parts[i][4] )
+                draw_hyperbolic_cell(trans, trans_s5);
+        }
+    }
+    ctx.restore();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "rgb(0,0,0)";
+    ctx.beginPath();
+    ctx.moveTo(canvas.width/2-3, canvas.height/2-3);
+    ctx.lineTo(canvas.width/2+3, canvas.height/2+3);
+    ctx.moveTo(canvas.width/2-3, canvas.height/2+3);
+    ctx.lineTo(canvas.width/2+3, canvas.height/2-3);
+    ctx.stroke();
+}
+
+var please_wait_node = document.getElementById("please-wait");
+please_wait_node.parentNode.removeChild(please_wait_node);
+
+write_string_in_id("maze-info", "The maze consists of "
+                   +(group_size/4)+" cells and has "
+                   +((group_size-walls_removed)/2)+" walls (out of a possible "
+                   +(group_size/2)+").");
+
+var projection_sel = document.getElementById("projection-sel");
+function select_projection() {
+    "use strict";
+    if ( projection_sel.value == 0 ) {
+        using_bk = false;
+        draw_hyperbolic_edge = draw_hyperbolic_edge_poincare;
+        draw_hyperbolic_cell = draw_hyperbolic_cell_poincare;
+    } else {
+        using_bk = true;
+        draw_hyperbolic_edge = draw_hyperbolic_edge_bk;
+        draw_hyperbolic_cell = draw_hyperbolic_cell_bk;
+    }
+}
+
+projection_sel.addEventListener("change", function(e) {
+    select_projection ();
+    draw_all ();
+    projection_sel.blur();
+    e.preventDefault();
+});
+
+select_projection();
+did_move();
+draw_all();
+
+function rotate(theta) {
+    // Rotate by theta radians.
+    current = moebius_product([Math.cos(theta/2), Math.sin(theta/2), 0, 0],
+                              current);
+    moebius_renormalize (current);
+    draw_all();
+}
+
+if ( typeof(Math.cosh) == "function" ) {
+    // Good boy!
+} else {
+    Math.cosh = function(t) { return (Math.exp(t)+Math.exp(-t))/2; }
+    Math.sinh = function(t) { return (Math.exp(t)-Math.exp(-t))/2; }
+}
+
+function move(dst, diru, dirv) {
+    "use strict";
+    // Move by dst (in hyperbolic distance) in direction (diru,dirv).
+    var cosh_half_dst = Math.cosh(dst/2);
+    var sinh_half_dst = Math.sinh(dst/2);
+    var dirnorm = Math.sqrt(diru*diru + dirv*dirv);
+    diru /= dirnorm;  dirv /= dirnorm;
+    var movement =
+        [cosh_half_dst, 0, -sinh_half_dst*diru, sinh_half_dst*dirv];
+    var candidate = moebius_product(movement, current);
+    var candidate_s5 = current_s5;
+    var candidate_fq = current_fq;
+    var p = moebius_apply (moebius_inverse(candidate), [0,0]);
+    var changed_square = false;
+    while ( 1 ) {
+        // Find the nearest edge.
+        if ( p[1]>p[0] && p[1]<-p[0] ) {
+            candidate = moebius_product(candidate, moebius_rot2);
+            p = moebius_apply(moebius_rot2, p);
+            candidate_s5 = multiply[candidate_s5][s5_rot2];
+            candidate_fq = pgl_fq_product(candidate_fq, pgl_fq_rot2);
+        } else if ( p[1]>p[0] ) {
+            candidate = moebius_product(candidate, moebius_rot1);
+            p = moebius_apply(moebius_rot3, p);
+            candidate_s5 = multiply[candidate_s5][s5_rot1];
+            candidate_fq = pgl_fq_product(candidate_fq, pgl_fq_rot1);
+        } else if ( p[1]<-p[0] ) {
+            candidate = moebius_product(candidate, moebius_rot3);
+            p = moebius_apply(moebius_rot1, p);
+            candidate_s5 = multiply[candidate_s5][s5_rot3];
+            candidate_fq = pgl_fq_product(candidate_fq, pgl_fq_rot3);
+        }
+        // Examine whether we crossed the edge.
+        var candidate2 = moebius_product(candidate, moebius_tflip);
+        var p2 = moebius_apply(moebius_tflip, p);
+        var candidate2_s5 = multiply[candidate_s5][s5_tflip];
+        var candidate2_fq = pgl_fq_product(candidate_fq, pgl_fq_tflip);
+        if ( p2[0]*p2[0] + p2[1]*p2[1] < p[0]*p[0] + p[1]*p[1] ) {
+            // We crossed the edge (or at least, attempted to).
+            if ( maze[candidate_s5] ) {
+                candidate = candidate2;
+                candidate_s5 = candidate2_s5;
+                candidate_fq = candidate2_fq;
+                p = p2;
+                changed_square = true;
+            } else
+                return;
+        } else
+            break;
+    }
+    // Update position and such.
+    current = candidate;
+    moebius_renormalize (current);
+    current_s5 = candidate_s5;
+    current_fq = candidate_fq;
+    if ( changed_square )
+        did_move();
+    draw_all();
+}
+
+function recenter() {
+    "use strict";
+    var p = moebius_apply(current, [1, 0]);
+    if ( p[1]>p[0] && p[1]<-p[0] )
+        current = moebius_rot2;
+    else if ( p[1]>p[0] )
+        current = moebius_rot1;
+    else if ( p[1]<-p[0] )
+        current = moebius_rot3;
+    else
+        current = moebius_idn;
+    draw_all();
+}
+
+// Chrome doesn't define KeyEvent. :-(
+var KE;
+if ( typeof(KeyEvent) == "undefined" )
+    KE = {};
+else
+    KE = KeyEvent;
+if ( typeof(KE.DOM_VK_SPACE) == "undefined" ) {
+    KE.DOM_VK_LEFT = 37;
+    KE.DOM_VK_RIGHT = 39;
+    KE.DOM_VK_UP = 38;
+    KE.DOM_VK_DOWN = 40;
+    KE.DOM_VK_INSERT = 45;
+    KE.DOM_VK_DELETE = 46;
+    KE.DOM_VK_F1 = 112;
+    KE.DOM_VK_F2 = 113;
+}
+
+// To make things more pleasant, make sure dist_step is exactly 1/12
+// of the distance between two cell centers.
+var dist_step = 0.08843958849208630433608490968446445715056545824489;
+
+var keyListener = function(e) {
+    "use strict";
+//    alert("Debug: "+e.keyCode);
+    if ( e.keyCode == KE.DOM_VK_LEFT ) {
+        rotate(Math.PI/20);
+        e.preventDefault();
+    } else if ( e.keyCode == KE.DOM_VK_RIGHT ) {
+        rotate(-Math.PI/20);
+        e.preventDefault();
+    } else if ( e.keyCode == KE.DOM_VK_UP ) {
+        move(dist_step, 1, 0);
+        e.preventDefault();
+    } else if ( e.keyCode == KE.DOM_VK_DOWN ) {
+        move(-dist_step, 1, 0);
+        e.preventDefault();
+    } else if ( e.keyCode == KE.DOM_VK_INSERT ) {
+        move(dist_step, 0, 1);
+        e.preventDefault();
+    } else if ( e.keyCode == KE.DOM_VK_DELETE ) {
+        move(-dist_step, 0, 1);
+        e.preventDefault();
+    } else if ( e.keyCode == KE.DOM_VK_F1 ) {
+        recenter();
+        e.preventDefault();
+    }
+};
+
+// Chrome doesn't send keypress events for special keys. :-(
+document.addEventListener("keydown", keyListener, false);
+
+function canvasClickHandler(e) {
+    "use strict";
+    var x = e.pageX - canvas.offsetLeft;
+    var y = e.pageY - canvas.offsetTop;
+    // alert("click at ("+x+","+y+")");
+    x -= canvas.width/2;
+    y -= canvas.height/2;
+    x /= scale;  y /= scale;
+    var nrm = Math.sqrt(x*x + y*y);
+    if ( nrm > 0 ) {
+        x /= nrm;  y /= nrm;
+        move(dist_step, -y, -x);
+    }
+    e.preventDefault();
+}
+canvas.addEventListener("click", canvasClickHandler, false);
+canvas.addEventListener("mousedown", function(e) {
+    e.preventDefault();  // Avoid text selection
+}, false);
+
+document.addEventListener("DOMContentLoaded", function(evt) {
+    "use strict";
+    var node = document.getElementById("explanations");
+    if ( location.hash == "#explanations" )
+        node.style.display = "block";
+    document.getElementById("show-explanations").addEventListener("click", function(e) {
+        if ( node.style.display == "block" ) {
+            node.style.display = "none";
+            location.hash = "";
+            e.preventDefault();
+        } else
+            node.style.display = "block";
+    }, false);
+}, false);
+
+// ]]>
+
+</script>
+
+<p>&#x2731; This is a <em>toy</em> version
+of <a href="hyperbolic-maze.html">the full game</a> (to illustrate how
+quotienting works).</p>
+
+<div id="explanations">
+
+<h2>Some comments about this maze</h2>
+
+<p>This is a maze in
+the <a href="http://en.wikipedia.org/wiki/Hyperbolic_geometry">hyperbolic
+plane</a>, displayed using
+the <a href="http://en.wikipedia.org/wiki/Poincar%C3%A9_disk_model">Poincaré
+disk</a>
+or <a href="http://en.wikipedia.org/wiki/Beltrami%E2%80%93Klein_model">Beltrami-Klein</a>
+model (see <a href="http://www.youtube.com/watch?v=xHvAqDuWG2M">this
+video</a> for explanations and illustrations about projections of the
+hyperbolic plane).  The fundamental pattern used to construct the maze
+is <a href="http://commons.wikimedia.org/wiki/File:Uniform_tiling_45-t0.png">the
+uniform tiling</a> of the hyperbolic plane by regular quadrilaterals
+(“squares”?) with angles of 2<var>π</var>/5=72° at each vertex (less
+than the 90° of a Euclidean square because the hyperbolic plane is
+negatively curved); a circle has been drawn at the center of every
+square.</p>
+
+<p>Use the up and down arrows to move up and down, left and right to
+rotate left and right, and insert and delete to move left and right
+without turning.  (Note that since the hyperbolic plane has curvature,
+even if
+one <a href="http://en.wikipedia.org/wiki/Parallel_transport">moves
+without turning</a>, one can return to one's starting point with a
+different orientation.  So it would be meaningless to have a “compass”
+in the hyperbolic plane.)</p>
+
+<p>Since the hyperbolic plane is infinite, the maze has been made
+“periodic”, in much the same way that the Euclidean plane can be made
+“periodic”, that is, transformed into a flat torus by quotienting by
+a <a href="http://en.wikipedia.org/wiki/Lattice_(group)">lattice</a>
+of periods, typically a square lattice in computer games, so that one
+“loops around” if one goes to far.  Here something analogous has been
+done, by quotienting out by
+a <a href="http://en.wikipedia.org/wiki/Fuchsian_group">discrete
+subgroup</a> <var>Γ</var>, acting without fixed points, of the
+group <a href="http://en.wikipedia.org/wiki/SL2(R)">PSL(2,ℝ)</a> of
+orientation-preserving isometries of the hyperbolic plane which is
+contained in the group <var>Δ</var> of symmetries of the tiling (the
+(2,4,5) <a href="http://en.wikipedia.org/wiki/Triangle_group">triangle
+group</a>); here, <var>Γ</var> is a normal subgroup and
+the quotient (PSL(2,ℝ)∩<var>Δ</var>)/<var>Γ</var> is
+the <a href="http://en.wikipedia.org/wiki/Symmetric_group">symmetric
+group</a> &#x1d516;₅ on 5 objects: since #&#x1d516;₅=120, the period
+domain consists of 30 cells (each cell has 4 orientation-preserving
+symmetries because it is a square), 60 edges (each edge has 2
+orientation-preserving symmetries) and 24 vertices (each vertex has
+5 orientation-preserving symmetries).  If one prefers, the maze lives
+on a
+compact <a href="http://en.wikipedia.org/wiki/Riemann_surface">Riemann
+surface</a>
+of <a href="http://en.wikipedia.org/wiki/Genus_(mathematics)">genus</a>
+4 (having 120 symmetries),
+whose <a href="http://en.wikipedia.org/wiki/Covering_space">universal
+cover</a> is the hyperbolic plane (and <var>Γ</var> is its fundamental
+group).  Or on
+the <a href="http://en.wikipedia.org/wiki/Cayley_graph">Cayley
+graph</a> of &#x1d516;₅ for two generators <var>R</var> (rotation
+around a cell) and <var>T</var> (translation to the next cell).</p>
+
+<p class="sidenote">The full version of this game differs essentially
+only in that the group is much larger, being PSL(2,89).</p>
+
+<p>The maze generation is not particularly smart: the algorithm first
+carves a tree inside the graph and then randomly removes another 15%
+of walls (a completely heuristic value to make the maze more
+interesting).  The distance to the starting point and “green point” (a
+point at maximal distance from the starting point) determines the
+color of the circles; the proposed goal is to first reach that target
+and then return to the starting point by using a path that is
+not <a href="http://en.wikipedia.org/wiki/Homotopy">homotopic</a>
+(even with the walls removed) to the first path (in other words, by
+“looping” in the sense that it defines a non-trivial element
+of <var>Γ</var>).</p>
+
+</div>
+
+<hr />
+
+<address><a href="http://www.madore.org/~david/">David Madore</a></address>
+
+</body>
+</html>
