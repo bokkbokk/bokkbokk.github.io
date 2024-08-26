@@ -4,7 +4,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Edu+VIC+WA+NT+Beginner:wght@400..700&display=swap" rel="stylesheet">
-
     <style>
       body {
         display: flex;
@@ -18,13 +17,11 @@
         color: #333;
         line-height: 1.6;
       }
-
       h1 {
         text-align: center;
         margin-top: 2rem;
         font-size: 2.5rem;
       }
-
       .lyrics {
         margin: 2rem;
         padding: 1rem;
@@ -34,7 +31,6 @@
         text-align: center;
         white-space: pre-wrap;
       }
-
       .album-cover {
         width: 300px;
         height: 300px;
@@ -42,12 +38,42 @@
         border-radius: 5px;
         float:left;
       }
+      
+      .container {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        margin: 0 auto;
+      }
+      
+      .album-info {
+        width: 50%;
+        padding: 1rem;
+        text-align: center;
+      }
+      
+      .lyrics-container {
+        width: 50%;
+        padding: 1rem;
+        text-align: center;
+      }
+      
+      .youtube-embed {
+        margin-bottom: 2rem;
+      }
     </style>
   </head>
   <body>
-    <img src="https://i.discogs.com/zFe-cBr5u6lnj_RRPw0CxmZu8IP0Pxf8Wi5VSyq2Llk/rs:fit/g:sm/q:40/h:300/w:300/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTIyMTI5/NDk4LTE2NDUzMjQz/MzItNDY2MS5qcGVn.jpeg" alt="Red Moon Album Cover" class="album-cover">
-    <h1>Red Moon - Big Thief</h1>
-    <pre class="lyrics"> Red moon rising like a fire in me
+    <div class="container">
+      <div class="album-info">
+        <img src="https://i.discogs.com/zFe-cBr5u6lnj_RRPw0CxmZu8IP0Pxf8Wi5VSyq2Llk/rs:fit/g:sm/q:40/h:300/w:300/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTIyMTI5/NDk4LTE2NDUzMjQz/MzItNDY2MS5qcGVn.jpeg" alt="Red Moon Album Cover" class="album-cover">
+        <div class="youtube-embed">
+          <!-- Embed the YouTube video here -->
+        </div>
+      </div>
+      <div class="lyrics-container">
+        <h1>Red Moon - Big Thief</h1>
+        <pre class="lyrics"> Red moon rising like a fire in me
 So many questions, she asks them all to me
 I have to answer most curiously
 Scarlet angel, I am too small to see
@@ -56,7 +82,6 @@ Burning the rubber down, crossing the hot concrete
 I'm gonna leave town, there is someone to meet
 She turns her head around a full three-sixty
 Woo
-
 Bedroom rising from an old growth tree
 Bringing out the sawmill, cutting the twelve-inch beams
 Building a pattern, the reservoir to fill with dreams
@@ -66,7 +91,6 @@ What do you yearn for? Where do you long to be?
 I've been here before, looking at the wild country
 Open the screen door, talking with Diane Lee
 That's my grandma
-
 Radio singing from the corner of the kitchen
 I got the oven on, I got the onions wishing
 They hadn't made me cry, filling the sink with dishes
@@ -76,6 +100,8 @@ Turning the lights out, glistening in the owl's eye
 Glimmer like lightning under the violet sky
 Shimmer like diamonds, watching the red moon rise
 Ooh</pre>
+      </div>
+    </div>
   </body>
   
 </html>
