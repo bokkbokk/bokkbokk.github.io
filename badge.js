@@ -7,5 +7,5 @@ badge.style.padding = '10px';
 badge.style.borderRadius = '5px';
 badge.style.cursor = 'pointer';
 badge.style.zIndex = '9999';
-badge.innerHTML = '<a href="/" style="color: black; text-decoration: none;">Home</a>';
+badge.innerHTML = '<a href="index.html" style="color: black; text-decoration: none;">Home</a>';
 document.body.appendChild(badge);
