@@ -9,6 +9,3 @@ badge.style.cursor = 'pointer';
 badge.style.zIndex = '9999';
 badge.innerHTML = '<a href="/" style="color: black; text-decoration: none;">Home</a>';
 document.body.appendChild(badge);
-
-
-<
