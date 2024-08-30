@@ -3,34 +3,15 @@
 <head>
   <title>Realtime Chat</title>
   <style>
-    body {
-      font-family: sans-serif;
-    }
-    #chat-container {
-      width: 500px;
-      margin: 0 auto;
-      border: 1px solid #ccc;
-      padding: 10px;
-    }
-    #message-list {
-      height: 300px;
-      overflow-y: scroll;
-      border: 1px solid #ccc;
-      padding: 10px;
-    }
-    .message {
-      margin-bottom: 10px;
-    }
-    .user-message {
-      text-align: right;
-    }
-    .other-message {
-      text-align: left;
-    }
-    .username {
-      font-weight: bold;
-    }
+    body { font-family: sans-serif; }
+    #chat-container { width: 500px; margin: 0 auto; border: 1px solid #ccc; padding: 10px; }
+    #message-list { height: 300px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; }
+    .message { margin-bottom: 10px; }
+    .user-message { text-align: right; }
+    .other-message { text-align: left; }
+    .username { font-weight: bold; }
   </style>
+  <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.29.9.min.js"></script>
 </head>
 <body>
   <div id="chat-container">
@@ -44,65 +25,47 @@
   </div>
 
   <script>
+    // Initialize PubNub
+    const pubnub = new PubNub({
+      publishKey: 'pub-c-9233a71f-55d9-4a79-8c20-49437dac12d4',
+      subscribeKey: 'sub-c-d33fc166-7366-400a-a165-dd78a88ed735'
+    });
+
     const messageList = document.getElementById('message-list');
     const usernameInput = document.getElementById('username');
     const messageInput = document.getElementById('message');
     const sendButton = document.getElementById('send-button');
-
-    let username = '';
+    const channel = 'chat';
 
     sendButton.addEventListener('click', () => {
+      const username = usernameInput.value;
       const message = messageInput.value;
-      if (message.trim() !== '' && username !== '') {
-        sendMessage(username, message);
+
+      if (message.trim() !== '' && username.trim() !== '') {
+        pubnub.publish({
+          channel: channel,
+          message: { username: username, message: message }
+        });
         messageInput.value = '';
-      } else if (username === '') {
-        alert('Please enter a username.');
       } else {
-        alert('Please enter a message.');
+        alert('Please enter both a username and a message.');
       }
     });
 
-    usernameInput.addEventListener('input', () => {
-      username = usernameInput.value;
+    pubnub.subscribe({ channels: [channel] });
+
+    pubnub.addListener({
+      message: function(event) {
+        const data = event.message;
+        displayMessage(data.username, data.message);
+      }
     });
-
-    const socket = new WebSocket('bokkbokk.github.io'); // Replace with your server address
-
-    socket.onopen = () => {
-      console.log('WebSocket connection opened');
-    };
-
-    socket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      displayMessage(data.username, data.message);
-    };
-
-    socket.onclose = () => {
-      console.log('WebSocket connection closed');
-    };
-
-    function sendMessage(username, message) {
-      const data = {
-        username: username,
-        message: message
-      };
-      socket.send(JSON.stringify(data));
-      displayMessage(username, message);
-    }
 
     function displayMessage(username, message) {
       const messageElement = document.createElement('div');
       messageElement.classList.add('message');
-      if (username === username) {
-        messageElement.classList.add('user-message');
-      } else {
-        messageElement.classList.add('other-message');
-      }
-      messageElement.innerHTML = `
-        <span class="username">${username}: </span>
-        ${message}
-      `;
+      messageElement.classList.add(username === usernameInput.value ? 'user-message' : 'other-message');
+      messageElement.innerHTML = `<span class="username">${username}:</span> ${message}`;
       messageList.appendChild(messageElement);
       messageList.scrollTop = messageList.scrollHeight;
     }
