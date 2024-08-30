@@ -8,4 +8,7 @@ badge.style.borderRadius = '5px';
 badge.style.cursor = 'pointer';
 badge.style.zIndex = '9999';
 badge.innerHTML = '<a href="/" style="color: black; text-decoration: none;">Home</a>';
+badge.addEventListener('click', () => {
+  window.location.href = '/';
+});
 document.body.appendChild(badge);
