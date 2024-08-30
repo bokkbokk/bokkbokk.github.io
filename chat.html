@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Realtime Chat</title>
+  <style>
+    body {
+      font-family: sans-serif;
+    }
+    #chat-container {
+      width: 500px;
+      margin: 0 auto;
+      border: 1px solid #ccc;
+      padding: 10px;
+    }
+    #message-list {
+      height: 300px;
+      overflow-y: scroll;
+      border: 1px solid #ccc;
+      padding: 10px;
+    }
+    .message {
+      margin-bottom: 10px;
+    }
+    .user-message {
+      text-align: right;
+    }
+    .other-message {
+      text-align: left;
+    }
+    .username {
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div id="chat-container">
+    <h1>Realtime Chat</h1>
+    <div id="message-list"></div>
+    <div>
+      <input type="text" id="username" placeholder="Enter your username" />
+      <input type="text" id="message" placeholder="Enter message" />
+      <button id="send-button">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const messageList = document.getElementById('message-list');
+    const usernameInput = document.getElementById('username');
+    const messageInput = document.getElementById('message');
+    const sendButton = document.getElementById('send-button');
+
+    let username = '';
+
+    sendButton.addEventListener('click', () => {
+      const message = messageInput.value;
+      if (message.trim() !== '' && username !== '') {
+        sendMessage(username, message);
+        messageInput.value = '';
+      } else if (username === '') {
+        alert('Please enter a username.');
+      } else {
+        alert('Please enter a message.');
+      }
+    });
+
+    usernameInput.addEventListener('input', () => {
+      username = usernameInput.value;
+    });
+
+    const socket = new WebSocket('bokkbokk.github.io'); // Replace with your server address
+
+    socket.onopen = () => {
+      console.log('WebSocket connection opened');
+    };
+
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      displayMessage(data.username, data.message);
+    };
+
+    socket.onclose = () => {
+      console.log('WebSocket connection closed');
+    };
+
+    function sendMessage(username, message) {
+      const data = {
+        username: username,
+        message: message
+      };
+      socket.send(JSON.stringify(data));
+      displayMessage(username, message);
+    }
+
+    function displayMessage(username, message) {
+      const messageElement = document.createElement('div');
+      messageElement.classList.add('message');
+      if (username === username) {
+        messageElement.classList.add('user-message');
+      } else {
+        messageElement.classList.add('other-message');
+      }
+      messageElement.innerHTML = `
+        <span class="username">${username}: </span>
+        ${message}
+      `;
+      messageList.appendChild(messageElement);
+      messageList.scrollTop = messageList.scrollHeight;
+    }
+  </script>
+</body>
+</html>
