@@ -1,25 +1,59 @@
 <style>
-  body{
+  body {
     background-color: black;
-    color:green;
+    position: relative;
+    overflow: hidden;
   }
+  
+  p {
+    color: green;
+    position: relative;
+    z-index: 1; /* Ensures text is above the overlay */
+  }
+  
+  /* Creating the 404 overlay */
   .overlay {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
+    pointer-events: none; /* Allows interaction with underlying elements */
     background: repeating-linear-gradient(
-      45deg, 
-      rgba(255, 255, 255, 0.05), 
-      rgba(255, 255, 255, 0.05) 10px, 
-      rgba(255, 255, 255, 0.0) 10px, 
-      rgba(255, 255, 255, 0.0) 20px
+      45deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.1) 20px,
+      transparent 20px,
+      transparent 40px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.1) 20px,
+      transparent 20px,
+      transparent 40px
     );
-    pointer-events: none; /* Allow interaction with underlying content */
+    z-index: 0; /* Places overlay behind the text */
   }
-</style> 
+
+  .overlay::before {
+    content: "404";
+    color: rgba(255, 255, 255, 0.1);
+    font-size: 100px;
+    line-height: 100px;
+    letter-spacing: 20px;
+    display: block;
+    text-align: center;
+    white-space: nowrap;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+</style>
+
 <body>
   <div class="overlay"></div>
   <p>nothing for you here</p>
-</body> 
+</body>
