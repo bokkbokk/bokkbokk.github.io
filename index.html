@@ -10,7 +10,8 @@
       font-family: "Courier New", monospace;
       text-align: center;
       margin: 0;
-      padding: 20px;
+      padding: 0;
+      overflow: hidden; /* Prevent scrollbars during transition */
     }
 
     #container {
@@ -20,6 +21,9 @@
       max-width: 800px;
       margin: 20px auto;
       padding: 20px;
+      position: relative; /* Ensure matrix animation is positioned correctly */
+      opacity: 0; /* Hide content initially */
+      transition: opacity 1s ease-in-out; /* Smooth transition to reveal content */
     }
 
     h1 {
@@ -68,14 +72,57 @@
     .crt-effect {
       animation: flicker 0.15s infinite;
     }
+
+    #matrix-animation {
+      position: fixed; /* Ensure it covers the entire viewport */
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: black;
+      color: lime;
+      font-family: monospace;
+      font-size: 16px;
+      pointer-events: none; /* Ensure it doesn't block interactions */
+      animation: matrix-drop 2s forwards; /* Animation for dropping effect */
+    }
+
+    @keyframes matrix-drop {
+      0% {
+        transform: translateY(0);
+      }
+      100% {
+        transform: translateY(100%);
+        opacity: 0;
+      }
+    }
+
+    .matrix-letter {
+      position: absolute;
+      opacity: 0;
+      animation: matrix-fall 3s linear forwards;
+    }
+
+    @keyframes matrix-fall {
+      0% {
+        transform: translateY(-100%);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100%);
+        opacity: 0;
+      }
+    }
   </style>
 </head>
 
 <body>
+  <div id="matrix-animation"></div>
+  
   <div id="container" class="crt-effect">
     <h1>Welcome to BokkBokk's Personal Website</h1>
-    <img class="pixelart" src="gif.gif" alt="gif tree swaying" width="100"
-      height="100">
+    <img class="pixelart" src="gif.gif" alt="gif tree swaying" width="100" height="100">
     <p>I put stuff here sometimes</p>
     <div class="menu">
       <a href="journal.html">Journal</a>
@@ -84,11 +131,37 @@
       <a href="">other</a>
     </div>
     <p>Last updated: 7.9.2024</p>
-    <a href="https://webring.geocities.com/earth-keepers">
-      <img src="gif2.gif" alt="pixel gif" width="88" height="31">
-    </a>
     <p><small>Nothing was harmed in the making of this website.</small></p>
   </div>
+
+  <script>
+    const matrixContainer = document.getElementById('matrix-animation');
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-={}[]|:;"\'<,>.?/~`';
+
+    function generateMatrixText() {
+      let matrixText = '';
+      for (let i = 0; i < 100; i++) {
+        matrixText += characters.charAt(Math.floor(Math.random() * characters.length));
+      }
+      return matrixText;
+    }
+
+    function createMatrixLetter() {
+      const letter = document.createElement('span');
+      letter.classList.add('matrix-letter');
+      letter.textContent = generateMatrixText();
+      letter.style.left = Math.random() * 100 + '%'; // Random starting position
+      matrixContainer.appendChild(letter);
+    }
+
+    // Create letters at intervals
+    setInterval(createMatrixLetter, 50);
+
+    // Transition to reveal content after matrix animation
+    matrixContainer.addEventListener('animationend', () => {
+      document.getElementById('container').style.opacity = '1';
+    });
+  </script>
 </body>
 
 </html>
