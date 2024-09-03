@@ -26,9 +26,9 @@
       transition: opacity 1s ease-in-out;
     }
 
-    h1 {
-      font-size: 24px;
-      text-shadow: 2px 2px 4px #003300;
+    h1, p, .menu a {
+      opacity: 0;
+      display: inline-block;
     }
 
     .menu {
@@ -37,108 +37,90 @@
       margin: 20px 0;
     }
 
-    .menu a {
-      color: #99ff66;
-      text-decoration: none;
-      padding: 5px 10px;
-      border: 1px solid #4a7023;
-      border-radius: 5px;
-      transition: background 0.3s;
-    }
-
-    .menu a:hover {
-      background: #003300;
-    }
-
     .pixelart {
       image-rendering: pixelated;
       image-rendering: crisp-edges;
+      opacity: 0;
     }
 
-    @keyframes fadeIn {
-      0% {
-        opacity: 0;
-      }
-      100% {
-        opacity: 1;
-      }
+    .cursor {
+      display: inline-block;
+      background-color: #7cfc00;
+      margin-left: 2px;
+      width: 10px;
+      height: 18px;
+      vertical-align: bottom;
+      animation: blink 0.8s steps(2, start) infinite;
     }
 
-    #matrix-animation {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: black;
-      color: lime;
-      font-family: monospace;
-      font-size: 16px;
-      pointer-events: none;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 999;
-      overflow: hidden;
-    }
-
-    .matrix-text {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      white-space: nowrap;
-      opacity: 1;
-      transform: translateY(0);
-      animation: fall 3s linear forwards, fadeOut 3s 3s forwards;
-    }
-
-    @keyframes fall {
-      0% {
-        transform: translateY(-100%);
-      }
-      100% {
-        transform: translateY(100%);
-      }
-    }
-
-    @keyframes fadeOut {
-      0% {
-        opacity: 1;
-      }
-      100% {
-        opacity: 0;
-      }
+    @keyframes blink {
+      from { opacity: 1; }
+      to { opacity: 0; }
     }
   </style>
 </head>
 
 <body>
-  <div id="matrix-animation">
-    <div id="matrix-text" class="matrix-text">ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-={}[]|:;"'<,>.?/~`</div>
-  </div>
-
-  <div id="container" class="crt-effect">
-    <h1>Welcome to BokkBokk's Personal Website</h1>
-    <img class="pixelart" src="gif.gif" alt="gif tree swaying" width="100" height="100">
-    <p>I put stuff here sometimes</p>
-    <div class="menu">
+  <div id="container">
+    <h1 id="title">Welcome to BokkBokk's Personal Website</h1>
+    <img id="image" class="pixelart" src="gif.gif" alt="gif tree swaying" width="100" height="100">
+    <p id="description">I put stuff here sometimes</p>
+    <div class="menu" id="menu">
       <a href="journal.html">Journal</a>
       <a href="projects.html">Gallery</a>
       <a href="connect.html">Connect</a>
       <a href="">other</a>
     </div>
-    <p>Last updated: 7.9.2024</p>
-    <p><small>Nothing was harmed in the making of this website.</small></p>
+    <p id="update">Last updated: 7.9.2024</p>
+    <p id="footer"><small>Nothing was harmed in the making of this website.</small></p>
+    <div class="cursor" id="cursor"></div>
   </div>
 
   <script>
-    const matrixContainer = document.getElementById('matrix-animation');
-    const container = document.getElementById('container');
+    const elements = [
+      { id: 'title', text: "Welcome to BokkBokk's Personal Website" },
+      { id: 'image', isImage: true },
+      { id: 'description', text: 'I put stuff here sometimes' },
+      { id: 'menu', text: 'Journal Gallery Connect other' },
+      { id: 'update', text: 'Last updated: 7.9.2024' },
+      { id: 'footer', text: 'Nothing was harmed in the making of this website.' }
+    ];
 
-    matrixContainer.addEventListener('animationend', () => {
-      container.style.opacity = '1';
-      matrixContainer.style.display = 'none';
-    });
+    const cursor = document.getElementById('cursor');
+    let currentElement = 0;
+    let currentChar = 0;
+
+    function typeText() {
+      if (currentElement < elements.length) {
+        const element = elements[currentElement];
+        const el = document.getElementById(element.id);
+
+        if (element.isImage) {
+          el.style.opacity = 1;
+          currentElement++;
+          currentChar = 0;
+          setTimeout(typeText, 500);
+        } else {
+          if (currentChar < element.text.length) {
+            el.innerHTML += element.text.charAt(currentChar);
+            el.style.opacity = 1;
+            currentChar++;
+            setTimeout(typeText, 50);
+          } else {
+            currentElement++;
+            currentChar = 0;
+            setTimeout(typeText, 500);
+          }
+        }
+      } else {
+        cursor.style.display = 'none';
+      }
+    }
+
+    setTimeout(() => {
+      document.getElementById('container').style.opacity = '1';
+      typeText();
+    }, 500);
   </script>
 </body>
 
