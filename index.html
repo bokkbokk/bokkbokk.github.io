@@ -11,7 +11,7 @@
       text-align: center;
       margin: 0;
       padding: 0;
-      overflow: hidden; /* Prevent scrollbars during transition */
+      overflow: hidden;
     }
 
     #container {
@@ -21,9 +21,9 @@
       max-width: 800px;
       margin: 20px auto;
       padding: 20px;
-      position: relative; /* Ensure matrix animation is positioned correctly */
-      opacity: 0; /* Hide content initially */
-      transition: opacity 1s ease-in-out; /* Smooth transition to reveal content */
+      position: relative;
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
     }
 
     h1 {
@@ -74,7 +74,7 @@
     }
 
     #matrix-animation {
-      position: fixed; /* Ensure it covers the entire viewport */
+      position: fixed;
       top: 0;
       left: 0;
       width: 100%;
@@ -84,23 +84,15 @@
       color: lime;
       font-family: monospace;
       font-size: 16px;
-      pointer-events: none; /* Ensure it doesn't block interactions */
-      animation: matrix-drop 2s forwards; /* Animation for dropping effect */
-    }
-
-    @keyframes matrix-drop {
-      0% {
-        transform: translateY(0);
-      }
-      100% {
-        transform: translateY(100%);
-        opacity: 0;
-      }
+      pointer-events: none;
+      z-index: 999; /* Ensure it covers everything */
     }
 
     .matrix-letter {
       position: absolute;
       opacity: 0;
+      bottom: 0;
+      transform: translateY(0);
       animation: matrix-fall 3s linear forwards;
     }
 
@@ -158,9 +150,9 @@
     setInterval(createMatrixLetter, 50);
 
     // Transition to reveal content after matrix animation
-    matrixContainer.addEventListener('animationend', () => {
+    setTimeout(() => {
       document.getElementById('container').style.opacity = '1';
-    });
+    }, 3000); // Adjust the time to match the duration of the animation
   </script>
 </body>
 
