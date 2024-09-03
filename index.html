@@ -4,6 +4,7 @@
 <head>
   <title>BokkBokk Site</title>
   <style>
+    /* Basic Styling */
     body {
       background: #001a00 url('forest-bg.gif') repeat;
       color: #7cfc00;
@@ -16,22 +17,28 @@
       height: 100vh;
     }
 
+    /* Container for Main Content */
     #container {
       background: rgba(0, 26, 0, 0.8);
       border: 2px solid #4a7023;
       border-radius: 10px;
       max-width: 800px;
-      margin: 20px auto;
+      margin: 50px auto;
       padding: 20px;
       position: relative;
       opacity: 0;
       transition: opacity 1s ease-in-out;
+      z-index: 1;
     }
 
-    h1, p, .menu, #image {
+    h1,
+    p,
+    .menu,
+    #image {
       margin: 20px;
     }
 
+    /* Menu Styling */
     .menu {
       display: flex;
       justify-content: space-around;
@@ -50,6 +57,7 @@
       background: #003300;
     }
 
+    /* Leaf Container */
     #leaf-container {
       position: fixed;
       top: 0;
@@ -58,24 +66,26 @@
       height: 100%;
       pointer-events: none;
       overflow: hidden;
-      z-index: 10;
+      z-index: 2;
     }
 
+    /* Leaf Styling and Animation */
     .leaf {
       position: absolute;
-      width: 50px;
-      height: 50px;
-      opacity: 1;
+      width: 30px;
+      height: 30px;
+      opacity: 0.8;
+      transform-origin: center;
       animation: fall linear forwards;
     }
 
     @keyframes fall {
       0% {
-        transform: translateY(-100px) rotate(0deg);
-        opacity: 1;
+        transform: translateY(-10vh) rotate(0deg);
+        opacity: 0.8;
       }
       100% {
-        transform: translateY(100vh) rotate(360deg);
+        transform: translateY(110vh) rotate(360deg);
         opacity: 0;
       }
     }
@@ -83,8 +93,10 @@
 </head>
 
 <body>
+  <!-- Leaf Animation Container -->
   <div id="leaf-container"></div>
 
+  <!-- Main Content -->
   <div id="container">
     <h1>Welcome to BokkBokk's Personal Website</h1>
     <img id="image" class="pixelart" src="gif.gif" alt="gif tree swaying" width="100" height="100">
@@ -93,43 +105,56 @@
       <a href="journal.html">Journal</a>
       <a href="projects.html">Gallery</a>
       <a href="connect.html">Connect</a>
-      <a href="">other</a>
+      <a href="#">Other</a>
     </div>
     <p>Last updated: 7.9.2024</p>
     <p><small>Nothing was harmed in the making of this website.</small></p>
   </div>
 
+  <!-- JavaScript for Leaf Animation -->
   <script>
-    // Define the number of leaves and the images used
-    const leafImages = ['leaf1.png', 'leaf1.png', 'leaf1.png']; // Use actual paths to your leaf images
-    const numberOfLeaves = 30;
+    // Configuration
+    const leafImages = ['leaf1.png', 'leaf2.png', 'leaf3.png', 'leaf4.png']; // Add paths to your leaf images
+    const numberOfLeaves = 100; // Increased number of leaves
+    const leafContainer = document.getElementById('leaf-container');
 
-    // Create leaf elements
+    // Function to create a single leaf
     function createLeaf() {
-      const leafContainer = document.getElementById('leaf-container');
       const leaf = document.createElement('img');
       leaf.src = leafImages[Math.floor(Math.random() * leafImages.length)];
       leaf.className = 'leaf';
+
+      // Random positioning and animation properties
       leaf.style.left = Math.random() * 100 + 'vw';
-      leaf.style.animationDuration = (Math.random() * 3 + 2) + 's';
-      leaf.style.animationDelay = Math.random() * 5 + 's';
+      leaf.style.animationDuration = (Math.random() * 3 + 2) + 's'; // 2s to 5s duration
+      leaf.style.animationDelay = Math.random() * 2 + 's'; // 0s to 2s delay
+      leaf.style.opacity = Math.random() * 0.5 + 0.5; // 0.5 to 1 opacity
+      leaf.style.transform = `scale(${Math.random() * 0.5 + 0.5})`; // Scale between 0.5 and 1
+
       leafContainer.appendChild(leaf);
 
-      // Remove leaf after it has fallen
+      // Remove leaf after animation completes
       leaf.addEventListener('animationend', () => {
         leaf.remove();
       });
     }
 
-    // Initialize the falling leaves
+    // Generate multiple leaves quickly
     for (let i = 0; i < numberOfLeaves; i++) {
-      setTimeout(createLeaf, i * 300);
+      createLeaf();
     }
 
-    // Reveal the page content after all leaves have fallen
-    setTimeout(() => {
-      document.getElementById('container').style.opacity = '1';
-    }, (numberOfLeaves * 300) + 5000); // Adjust timing as needed
+    // Continuously add leaves at intervals
+    setInterval(() => {
+      createLeaf();
+    }, 200); // Every 200 milliseconds
+
+    // Reveal main content after a short delay
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        document.getElementById('container').style.opacity = '1';
+      }, 3000); // Reveal after 3 seconds
+    });
   </script>
 </body>
 
