@@ -55,22 +55,13 @@
       image-rendering: crisp-edges;
     }
 
-    @keyframes flicker {
+    @keyframes fadeIn {
       0% {
-        opacity: 1;
+        opacity: 0;
       }
-
-      50% {
-        opacity: 0.8;
-      }
-
       100% {
         opacity: 1;
       }
-    }
-
-    .crt-effect {
-      animation: flicker 0.15s infinite;
     }
 
     #matrix-animation {
@@ -79,30 +70,42 @@
       left: 0;
       width: 100%;
       height: 100%;
-      overflow: hidden;
       background-color: black;
       color: lime;
       font-family: monospace;
       font-size: 16px;
       pointer-events: none;
-      z-index: 999; /* Ensure it covers everything */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+      overflow: hidden;
     }
 
-    .matrix-letter {
+    .matrix-text {
       position: absolute;
-      opacity: 0;
-      bottom: 0;
+      width: 100%;
+      height: 100%;
+      white-space: nowrap;
+      opacity: 1;
       transform: translateY(0);
-      animation: matrix-fall 3s linear forwards;
+      animation: fall 3s linear forwards, fadeOut 3s 3s forwards;
     }
 
-    @keyframes matrix-fall {
+    @keyframes fall {
       0% {
         transform: translateY(-100%);
-        opacity: 1;
       }
       100% {
         transform: translateY(100%);
+      }
+    }
+
+    @keyframes fadeOut {
+      0% {
+        opacity: 1;
+      }
+      100% {
         opacity: 0;
       }
     }
@@ -110,8 +113,10 @@
 </head>
 
 <body>
-  <div id="matrix-animation"></div>
-  
+  <div id="matrix-animation">
+    <div id="matrix-text" class="matrix-text">ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-={}[]|:;"'<,>.?/~`</div>
+  </div>
+
   <div id="container" class="crt-effect">
     <h1>Welcome to BokkBokk's Personal Website</h1>
     <img class="pixelart" src="gif.gif" alt="gif tree swaying" width="100" height="100">
@@ -128,31 +133,12 @@
 
   <script>
     const matrixContainer = document.getElementById('matrix-animation');
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-={}[]|:;"\'<,>.?/~`';
+    const container = document.getElementById('container');
 
-    function generateMatrixText() {
-      let matrixText = '';
-      for (let i = 0; i < 100; i++) {
-        matrixText += characters.charAt(Math.floor(Math.random() * characters.length));
-      }
-      return matrixText;
-    }
-
-    function createMatrixLetter() {
-      const letter = document.createElement('span');
-      letter.classList.add('matrix-letter');
-      letter.textContent = generateMatrixText();
-      letter.style.left = Math.random() * 100 + '%'; // Random starting position
-      matrixContainer.appendChild(letter);
-    }
-
-    // Create letters at intervals
-    setInterval(createMatrixLetter, 50);
-
-    // Transition to reveal content after matrix animation
-    setTimeout(() => {
-      document.getElementById('container').style.opacity = '1';
-    }, 3000); // Adjust the time to match the duration of the animation
+    matrixContainer.addEventListener('animationend', () => {
+      container.style.opacity = '1';
+      matrixContainer.style.display = 'none';
+    });
   </script>
 </body>
 
