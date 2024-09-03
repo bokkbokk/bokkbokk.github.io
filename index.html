@@ -114,8 +114,8 @@
   <!-- JavaScript for Leaf Animation -->
   <script>
     // Configuration
-    const leafImages = ['leaf1.png', 'leaf2.png', 'leaf3.png', 'leaf4.png']; // Add paths to your leaf images
-    const numberOfLeaves = 100; // Increased number of leaves
+    const leafImages = ['leaf1.png', 'leaf1.png', 'leaf1.png', 'leaf1.png']; // Add paths to your leaf images
+    const numberOfLeaves = 300; // Increased number of leaves
     const leafContainer = document.getElementById('leaf-container');
 
     // Function to create a single leaf
@@ -147,7 +147,7 @@
     // Continuously add leaves at intervals
     setInterval(() => {
       createLeaf();
-    }, 200); // Every 200 milliseconds
+    }, 20); // Every 200 milliseconds
 
     // Reveal main content after a short delay
     window.addEventListener('load', () => {
