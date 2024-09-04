@@ -27,10 +27,7 @@ const ctx = canvas.getContext('2d');
 
 // Config settings
 const config = {
-    leafCount: 8000, // Increased the number of leaves
-    mouseRadius: 100,
-    interactionMode: 'repel',
-    elasticity: 0.05, // Increased elasticity for a more dynamic response
+    leafCount: 8000, // Number of leaves
     maxLeafSize: 40,  // Maximum leaf size
     minLeafSize: 25   // Minimum leaf size
 };
@@ -77,52 +74,6 @@ class Leaf {
         this.img = img;
         this.size = size;
         this.angle = Math.random() * 360;  // Initial random angle
-        this.spinSpeed = (Math.random() * 0.5) - 0.25;  // Random spin speed
-        this.baseX = x;
-        this.baseY = y;
-        this.density = (Math.random() * 30) + 1;
-    }
-
-    update() {
-        if (mouse.x !== null && mouse.y !== null) {
-            let dx = mouse.x - this.x;
-            let dy = mouse.y - this.y;
-            let distance = Math.sqrt(dx * dx + dy * dy);
-            let forceDirectionX = dx / distance;
-            let forceDirectionY = dy / distance;
-            let maxDistance = mouse.radius;
-            let force = (maxDistance - distance) / maxDistance;
-            let directionX = forceDirectionX * force * this.density;
-            let directionY = forceDirectionY * force * this.density;
-
-            if (distance < mouse.radius) {
-                switch(config.interactionMode) {
-                    case 'repel':
-                        this.x -= directionX;
-                        this.y -= directionY;
-                        break;
-                    case 'attract':
-                        this.x += directionX;
-                        this.y += directionY;
-                        break;
-                    case 'cut':
-                        this.baseX = this.x;
-                        this.baseY = this.y;
-                        break;
-                }
-            }
-        }
-
-        if (this.x !== this.baseX) {
-            let dx = this.x - this.baseX;
-            this.x -= dx * config.elasticity;
-        }
-        if (this.y !== this.baseY) {
-            let dy = this.y - this.baseY;
-            this.y -= dy * config.elasticity;
-        }
-
-        this.angle += this.spinSpeed;  // Update the angle to create spinning
     }
 
     draw() {
@@ -143,34 +94,21 @@ class Leaf {
     }
 }
 
-// Mouse position
-let mouse = {
-    x: null,
-    y: null,
-    radius: config.mouseRadius
-}
-
-canvas.addEventListener('mousemove', function(event) {
-    mouse.x = event.x;
-    mouse.y = event.y;
-});
-
-canvas.addEventListener('mouseleave', function() {
-    mouse.x = null;
-    mouse.y = null;
-});
-
 let leafArray = [];
 
 // Initialize leaves
 function init() {
     leafArray = [];
-    for (let i = 0; i < config.leafCount; i++) {
-        let x = Math.random() * canvas.width;
-        let y = Math.random() * canvas.height;
-        let size = Math.random() * (config.maxLeafSize - config.minLeafSize) + config.minLeafSize;
-        let imgIndex = Math.floor(Math.random() * leafImages.length);
-        leafArray.push(new Leaf(x, y, leafImages[imgIndex], size));
+    const rows = Math.ceil(canvas.height / config.maxLeafSize);
+    const cols = Math.ceil(canvas.width / config.maxLeafSize);
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            let size = Math.random() * (config.maxLeafSize - config.minLeafSize) + config.minLeafSize;
+            let x = j * config.maxLeafSize;
+            let y = i * config.maxLeafSize;
+            let imgIndex = Math.floor(Math.random() * leafImages.length);
+            leafArray.push(new Leaf(x, y, leafImages[imgIndex], size));
+        }
     }
 }
 
@@ -179,7 +117,6 @@ function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     for (let i = 0; i < leafArray.length; i++) {
-        leafArray[i].update();
         leafArray[i].draw();
     }
 
