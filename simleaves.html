@@ -111,10 +111,10 @@ class Leaf {
             this.x += speed * Math.cos(angle);
             this.y += speed * Math.sin(angle);
 
-            // Stop the animation when the leaf is out of the canvas
+            // Remove the leaf if it's fully out of view
             if (this.x < -this.size || this.x > canvas.width + this.size || 
                 this.y < -this.size || this.y > canvas.height + this.size) {
-                this.disperse = false; // Stop animating once out of view
+                this.removeLeaf();
             }
         }
     }
@@ -133,6 +133,13 @@ class Leaf {
             ctx.arc(this.x, this.y, 10, 0, Math.PI * 2);
             ctx.closePath();
             ctx.fill();
+        }
+    }
+
+    removeLeaf() {
+        const index = leafArray.indexOf(this);
+        if (index > -1) {
+            leafArray.splice(index, 1);
         }
     }
 }
