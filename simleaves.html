@@ -27,7 +27,7 @@ const ctx = canvas.getContext('2d');
 
 // Config settings
 const config = {
-    leafCount: 4000, // Increased the number of leaves
+    leafCount: 8000, // Increased the number of leaves
     mouseRadius: 100,
     interactionMode: 'repel',
     elasticity: 0.05, // Increased elasticity for a more dynamic response
@@ -144,11 +144,11 @@ class Leaf {
 }
 
 // Mouse position
-let mouse = {
-    x: null,
-    y: null,
-    radius: config.mouseRadius
-}
+//let mouse = {
+ //   x: null,
+ //   y: null,
+ //   radius: config.mouseRadius
+//}
 
 canvas.addEventListener('mousemove', function(event) {
     mouse.x = event.x;
