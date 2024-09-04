@@ -29,15 +29,8 @@
             padding: 10px;
             border-radius: 5px;
         }
-        .control-group {
+        button {
             margin-bottom: 10px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-        }
-        input[type=range] {
-            width: 100%;
         }
     </style>
 </head>
@@ -45,23 +38,7 @@
 <canvas id="particleCanvas"></canvas>
 
 <div id="controls">
-    <div class="control-group">
-        <label for="leafCount">Leaf Count: <span id="leafCountValue">20000</span></label>
-        <input type="range" id="leafCount" min="1000" max="20000" value="20000">
-    </div>
-    <div class="control-group">
-        <label for="maxLeafSize">Max Leaf Size: <span id="maxLeafSizeValue">51</span>px</label>
-        <input type="range" id="maxLeafSize" min="10" max="60" value="51">
-    </div>
-    <div class="control-group">
-        <label for="minLeafSize">Min Leaf Size: <span id="minLeafSizeValue">32</span>px</label>
-        <input type="range" id="minLeafSize" min="5" max="50" value="32">
-    </div>
-    <div class="control-group">
-        <label for="overlapFactor">Overlap Factor: <span id="overlapFactorValue">1.5</span></label>
-        <input type="range" id="overlapFactor" min="0.5" max="1.5" step="0.1" value="1.5">
-    </div>
-    <button id="applySettings">Apply Settings</button>
+    <button id="disperseLeaves">Disperse Leaves</button>
 </div>
 
 <script>
@@ -70,7 +47,7 @@ const ctx = canvas.getContext('2d');
 
 // Config settings
 const config = {
-    leafCount: 21000,
+    leafCount: 20000,
     maxLeafSize: 51,
     minLeafSize: 32,
     overlapFactor: 1.5,
@@ -118,6 +95,28 @@ class Leaf {
         this.img = img;
         this.size = size;
         this.angle = Math.random() * 360;  // Initial random angle
+        this.initialX = x;
+        this.initialY = y;
+        this.disperse = false;
+    }
+
+    update() {
+        if (this.disperse) {
+            const dx = this.x - canvas.width / 2;
+            const dy = this.y - canvas.height / 2;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const speed = 2; // Speed of dispersion
+            const angle = Math.atan2(dy, dx);
+
+            this.x += speed * Math.cos(angle);
+            this.y += speed * Math.sin(angle);
+
+            // Stop the animation when the leaf is out of the canvas
+            if (this.x < -this.size || this.x > canvas.width + this.size || 
+                this.y < -this.size || this.y > canvas.height + this.size) {
+                this.disperse = false; // Stop animating once out of view
+            }
+        }
     }
 
     draw() {
@@ -139,6 +138,7 @@ class Leaf {
 }
 
 let leafArray = [];
+let dispersing = false;
 
 // Initialize leaves
 function init() {
@@ -159,10 +159,16 @@ function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     for (let i = 0; i < leafArray.length; i++) {
+        leafArray[i].update();
         leafArray[i].draw();
     }
 
-    requestAnimationFrame(animate);
+    if (dispersing) {
+        requestAnimationFrame(animate);
+    } else {
+        // Continue animating leaves even when not dispersing to handle dynamic effects
+        requestAnimationFrame(animate);
+    }
 }
 
 // Handle window resize
@@ -171,19 +177,12 @@ window.addEventListener('resize', function() {
     init();
 });
 
-// Update settings based on user input
-document.getElementById('applySettings').addEventListener('click', function() {
-    config.leafCount = parseInt(document.getElementById('leafCount').value);
-    config.maxLeafSize = parseInt(document.getElementById('maxLeafSize').value);
-    config.minLeafSize = parseInt(document.getElementById('minLeafSize').value);
-    config.overlapFactor = parseFloat(document.getElementById('overlapFactor').value);
-
-    document.getElementById('leafCountValue').textContent = config.leafCount;
-    document.getElementById('maxLeafSizeValue').textContent = config.maxLeafSize;
-    document.getElementById('minLeafSizeValue').textContent = config.minLeafSize;
-    document.getElementById('overlapFactorValue').textContent = config.overlapFactor;
-
-    init(); // Reinitialize leaves with new settings
+// Disperse leaves button
+document.getElementById('disperseLeaves').addEventListener('click', function() {
+    dispersing = true;
+    for (let i = 0; i < leafArray.length; i++) {
+        leafArray[i].disperse = true;
+    }
 });
 
 </script>
