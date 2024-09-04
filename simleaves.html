@@ -1,18 +1,22 @@
-<html><head><base href="https://interactive-web-simulation.example.com/particle-web/">
-<title>Embeddable Particle Web Simulation with Slow Twinkling Stars</title>
-<style>
-    body, html {
-        margin: 0;
-        padding: 0;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        background-color: rgb(61,68,53);
-    }
-    canvas {
-        display: block;
-    }
-</style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Embeddable Particle Web Simulation with Slow Twinkling Stars</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: rgb(61, 68, 53);
+        }
+        canvas {
+            display: block;
+        }
+    </style>
 </head>
 <body>
 <canvas id="particleCanvas"></canvas>
@@ -37,10 +41,22 @@ const leafImagePaths = [
   'leaf1.png'
 ];
 
+// Load images and ensure they are ready
+let imagesLoaded = 0;
 for (let i = 0; i < leafImagePaths.length; i++) {
-  let img = new Image();
-  img.src = leafImagePaths[i];
-  leafImages.push(img);
+    let img = new Image();
+    img.src = leafImagePaths[i];
+    img.onload = () => {
+        imagesLoaded++;
+        if (imagesLoaded === leafImagePaths.length) {
+            init();
+            animate();
+        }
+    };
+    img.onerror = () => {
+        console.error("Failed to load image:", img.src);
+    };
+    leafImages.push(img);
 }
 
 // Resize canvas to fit window
@@ -103,7 +119,16 @@ class Leaf {
     }
 
     draw() {
-        ctx.drawImage(this.img, this.x, this.y);
+        if (this.img.complete) {
+            ctx.drawImage(this.img, this.x, this.y);
+        } else {
+            // Fallback shape if image is not loaded
+            ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, 10, 0, Math.PI * 2);
+            ctx.closePath();
+            ctx.fill();
+        }
     }
 }
 
@@ -149,24 +174,11 @@ function animate() {
     requestAnimationFrame(animate);
 }
 
-// Load all leaf images before initializing
-let imageCount = leafImages.length;
-let imagesLoaded = 0;
-
-for (let i = 0; i < leafImages.length; i++) {
-  leafImages[i].onload = () => {
-    imagesLoaded++;
-    if (imagesLoaded === imageCount) {
-      init();
-      animate();
-    }
-  };
-}
-
 // Handle window resize
 window.addEventListener('resize', function() {
     resizeCanvas();
     init();
 });
 </script>
-</body></html>
+</body>
+</html>
