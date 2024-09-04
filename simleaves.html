@@ -11,7 +11,7 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: rgb(61, 68, 53);
+            background-color: rgba(0, 0, 0, 0); /* Transparent background */
             font-family: Arial, sans-serif;
             color: white;
         }
@@ -39,8 +39,10 @@
 
 <div id="controls">
     <button id="disperseLeaves">Disperse Leaves</button>
+    <button id="captureGif">Capture GIF</button>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.min.js"></script>
 <script>
 const canvas = document.getElementById('particleCanvas');
 const ctx = canvas.getContext('2d');
@@ -56,9 +58,9 @@ const config = {
 // Leaf image loading
 const leafImages = [];
 const leafImagePaths = [
-  'leaf1.png', // Replace with your leaf image file paths
-  'leaf1.png',
-  'leaf1.png'
+    'leaf1.png', // Replace with your leaf image file paths
+    'leaf1.png',
+    'leaf1.png'
 ];
 
 // Load images and ensure they are ready
@@ -111,10 +113,10 @@ class Leaf {
             this.x += speed * Math.cos(angle);
             this.y += speed * Math.sin(angle);
 
-            // Stop the animation when the leaf is out of the canvas
+            // Remove the leaf if it's fully out of view
             if (this.x < -this.size || this.x > canvas.width + this.size || 
                 this.y < -this.size || this.y > canvas.height + this.size) {
-                this.disperse = false; // Stop animating once out of view
+                this.removeLeaf();
             }
         }
     }
@@ -133,6 +135,13 @@ class Leaf {
             ctx.arc(this.x, this.y, 10, 0, Math.PI * 2);
             ctx.closePath();
             ctx.fill();
+        }
+    }
+
+    removeLeaf() {
+        const index = leafArray.indexOf(this);
+        if (index > -1) {
+            leafArray.splice(index, 1);
         }
     }
 }
@@ -185,6 +194,32 @@ document.getElementById('disperseLeaves').addEventListener('click', function() {
     }
 });
 
+// Capture GIF button
+document.getElementById('captureGif').addEventListener('click', function() {
+    const captureFrames = 60; // Number of frames to capture
+    let frameCount = 0;
+    
+    const gif = new GIF({
+        workers: 2,
+        quality: 10,
+        background: 'rgba(0, 0, 0, 0)', // Transparent background
+    });
+
+    function capture() {
+        if (frameCount < captureFrames) {
+            gif.addFrame(canvas, { delay: 100, copy: true });
+            frameCount++;
+            requestAnimationFrame(capture);
+        } else {
+            gif.on('finished', (blob) => {
+                window.open(URL.createObjectURL(blob));
+            });
+            gif.render();
+        }
+    }
+
+    capture();
+});
 </script>
 </body>
 </html>
