@@ -27,7 +27,7 @@ const ctx = canvas.getContext('2d');
 
 // Config settings
 const config = {
-    leafCount: 8000, // Number of leaves
+    leafCount: 15000, // Increased number of leaves
     maxLeafSize: 40,  // Maximum leaf size
     minLeafSize: 25   // Minimum leaf size
 };
@@ -99,12 +99,12 @@ let leafArray = [];
 // Initialize leaves
 function init() {
     leafArray = [];
-    const totalLeaves = config.leafCount;
+    const overlapFactor = 0.8;  // Adjust this factor to increase overlap
 
-    for (let i = 0; i < totalLeaves; i++) {
+    for (let i = 0; i < config.leafCount; i++) {
         let size = Math.random() * (config.maxLeafSize - config.minLeafSize) + config.minLeafSize;
-        let x = Math.random() * (canvas.width + size) - size;
-        let y = Math.random() * (canvas.height + size) - size;
+        let x = Math.random() * (canvas.width + size) * overlapFactor - size;
+        let y = Math.random() * (canvas.height + size) * overlapFactor - size;
         let imgIndex = Math.floor(Math.random() * leafImages.length);
         leafArray.push(new Leaf(x, y, leafImages[imgIndex], size));
     }
