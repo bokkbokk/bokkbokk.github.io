@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Embeddable Particle Web Simulation with Slow Twinkling Stars</title>
+    <title>Interactive Leaf Pile Simulation</title>
     <style>
         body, html {
             margin: 0;
@@ -27,10 +27,12 @@ const ctx = canvas.getContext('2d');
 
 // Config settings
 const config = {
-    leafCount: 100, // Adjust the number of leaves
-    mouseRadius: 130,
+    leafCount: 500, // Increased the number of leaves
+    mouseRadius: 150,
     interactionMode: 'repel',
-    elasticity: 0.015
+    elasticity: 0.05, // Increased elasticity for a more dynamic response
+    maxLeafSize: 30,  // Maximum leaf size
+    minLeafSize: 15   // Minimum leaf size
 };
 
 // Leaf image loading
@@ -69,10 +71,13 @@ window.addEventListener('resize', resizeCanvas);
 
 // Leaf class
 class Leaf {
-    constructor(x, y, img) {
+    constructor(x, y, img, size) {
         this.x = x;
         this.y = y;
         this.img = img;
+        this.size = size;
+        this.angle = Math.random() * 360;  // Initial random angle
+        this.spinSpeed = (Math.random() * 0.5) - 0.25;  // Random spin speed
         this.baseX = x;
         this.baseY = y;
         this.density = (Math.random() * 30) + 1;
@@ -116,11 +121,17 @@ class Leaf {
             let dy = this.y - this.baseY;
             this.y -= dy * config.elasticity;
         }
+
+        this.angle += this.spinSpeed;  // Update the angle to create spinning
     }
 
     draw() {
         if (this.img.complete) {
-            ctx.drawImage(this.img, this.x, this.y);
+            ctx.save();
+            ctx.translate(this.x + this.size / 2, this.y + this.size / 2);
+            ctx.rotate(this.angle * Math.PI / 180);
+            ctx.drawImage(this.img, -this.size / 2, -this.size / 2, this.size, this.size);
+            ctx.restore();
         } else {
             // Fallback shape if image is not loaded
             ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
@@ -157,8 +168,9 @@ function init() {
     for (let i = 0; i < config.leafCount; i++) {
         let x = Math.random() * canvas.width;
         let y = Math.random() * canvas.height;
+        let size = Math.random() * (config.maxLeafSize - config.minLeafSize) + config.minLeafSize;
         let imgIndex = Math.floor(Math.random() * leafImages.length);
-        leafArray.push(new Leaf(x, y, leafImages[imgIndex]));
+        leafArray.push(new Leaf(x, y, leafImages[imgIndex], size));
     }
 }
 
