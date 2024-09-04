@@ -99,16 +99,14 @@ let leafArray = [];
 // Initialize leaves
 function init() {
     leafArray = [];
-    const rows = Math.ceil(canvas.height / config.maxLeafSize);
-    const cols = Math.ceil(canvas.width / config.maxLeafSize);
-    for (let i = 0; i < rows; i++) {
-        for (let j = 0; j < cols; j++) {
-            let size = Math.random() * (config.maxLeafSize - config.minLeafSize) + config.minLeafSize;
-            let x = j * config.maxLeafSize;
-            let y = i * config.maxLeafSize;
-            let imgIndex = Math.floor(Math.random() * leafImages.length);
-            leafArray.push(new Leaf(x, y, leafImages[imgIndex], size));
-        }
+    const totalLeaves = config.leafCount;
+
+    for (let i = 0; i < totalLeaves; i++) {
+        let size = Math.random() * (config.maxLeafSize - config.minLeafSize) + config.minLeafSize;
+        let x = Math.random() * (canvas.width + size) - size;
+        let y = Math.random() * (canvas.height + size) - size;
+        let imgIndex = Math.floor(Math.random() * leafImages.length);
+        leafArray.push(new Leaf(x, y, leafImages[imgIndex], size));
     }
 }
 
