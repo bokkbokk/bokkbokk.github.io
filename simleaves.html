@@ -46,20 +46,20 @@
 
 <div id="controls">
     <div class="control-group">
-        <label for="leafCount">Leaf Count: <span id="leafCountValue">15000</span></label>
-        <input type="range" id="leafCount" min="1000" max="20000" value="15000">
+        <label for="leafCount">Leaf Count: <span id="leafCountValue">20000</span></label>
+        <input type="range" id="leafCount" min="1000" max="20000" value="20000">
     </div>
     <div class="control-group">
-        <label for="maxLeafSize">Max Leaf Size: <span id="maxLeafSizeValue">40</span>px</label>
-        <input type="range" id="maxLeafSize" min="10" max="60" value="40">
+        <label for="maxLeafSize">Max Leaf Size: <span id="maxLeafSizeValue">51</span>px</label>
+        <input type="range" id="maxLeafSize" min="10" max="60" value="51">
     </div>
     <div class="control-group">
-        <label for="minLeafSize">Min Leaf Size: <span id="minLeafSizeValue">25</span>px</label>
-        <input type="range" id="minLeafSize" min="5" max="50" value="25">
+        <label for="minLeafSize">Min Leaf Size: <span id="minLeafSizeValue">32</span>px</label>
+        <input type="range" id="minLeafSize" min="5" max="50" value="32">
     </div>
     <div class="control-group">
-        <label for="overlapFactor">Overlap Factor: <span id="overlapFactorValue">0.8</span></label>
-        <input type="range" id="overlapFactor" min="0.5" max="1.5" step="0.1" value="0.8">
+        <label for="overlapFactor">Overlap Factor: <span id="overlapFactorValue">1.5</span></label>
+        <input type="range" id="overlapFactor" min="0.5" max="1.5" step="0.1" value="1.5">
     </div>
     <button id="applySettings">Apply Settings</button>
 </div>
@@ -70,10 +70,10 @@ const ctx = canvas.getContext('2d');
 
 // Config settings
 const config = {
-    leafCount: 15000,
-    maxLeafSize: 40,
-    minLeafSize: 25,
-    overlapFactor: 0.8,
+    leafCount: 20000,
+    maxLeafSize: 51,
+    minLeafSize: 32,
+    overlapFactor: 1.5,
 };
 
 // Leaf image loading
