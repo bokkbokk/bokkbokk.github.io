@@ -1,4 +1,4 @@
-modules = ["python-3.10", "web:v2-20230623-0b7a606"]
+modules = ["nodejs-20", "python-3.10", "web:v2-20230623-0b7a606"]
 run = "python3 -m http.server 8000"
 
 [nix]
