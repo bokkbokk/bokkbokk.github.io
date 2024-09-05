@@ -11,7 +11,7 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: transparent;
+            background-color: rgb(0, 0, 0,0);
             font-family: Arial, sans-serif;
             color: white;
         }
@@ -21,12 +21,25 @@
             top: 0;
             left: 0;
         }
+        #controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+        }
+        button {
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
 <canvas id="particleCanvas"></canvas>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ccapture.js/1.1.0/CCapture.all.min.js"></script>
+<div id="controls">
+    <button id="disperseLeaves">Disperse Leaves</button>
+</div>
 
 <script>
 const canvas = document.getElementById('particleCanvas');
@@ -57,9 +70,7 @@ for (let i = 0; i < leafImagePaths.length; i++) {
         imagesLoaded++;
         if (imagesLoaded === leafImagePaths.length) {
             init();
-            startRecording();  // Start capturing GIF frames
             animate();
-            disperseLeaves();
         }
     };
     img.onerror = () => {
@@ -147,29 +158,16 @@ function init() {
 function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    let allLeavesOffscreen = true;
     for (let i = 0; i < leafArray.length; i++) {
         leafArray[i].update();
         leafArray[i].draw();
-        if (!leafArray[i].disperse) {
-            allLeavesOffscreen = false;
-        }
     }
 
-    capturer.capture(canvas);
-
-    if (allLeavesOffscreen) {
-        stopRecording();  // Stop recording when all leaves are off the screen
-    } else {
+    if (dispersing) {
         requestAnimationFrame(animate);
-    }
-}
-
-// Disperse leaves
-function disperseLeaves() {
-    dispersing = true;
-    for (let i = 0; i < leafArray.length; i++) {
-        leafArray[i].disperse = true;
+    } else {
+        // Continue animating leaves even when not dispersing to handle dynamic effects
+        requestAnimationFrame(animate);
     }
 }
 
@@ -179,24 +177,13 @@ window.addEventListener('resize', function() {
     init();
 });
 
-// CCapture settings and recording
-let capturer;
-
-function startRecording() {
-    capturer = new CCapture({
-        format: 'gif',
-        workersPath: './',
-        framerate: 60,
-        verbose: true
-    });
-
-    capturer.start();
-}
-
-function stopRecording() {
-    capturer.stop();
-    capturer.save();
-}
+// Disperse leaves button
+document.getElementById('disperseLeaves').addEventListener('click', function() {
+    dispersing = true;
+    for (let i = 0; i < leafArray.length; i++) {
+        leafArray[i].disperse = true;
+    }
+});
 
 </script>
 </body>
