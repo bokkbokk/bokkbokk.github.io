@@ -54,9 +54,9 @@
 
     .vine-pixel {
       position: absolute;
-      width: 2px;
-      height: 2px;
-      background-color: #4a7023;
+      width: 4px; /* Increased size for thicker vines */
+      height: 4px;
+      background-color: #18250b;
     }
   </style>
   <script>
@@ -93,7 +93,7 @@
       if (randomPoint < container.offsetWidth) { // Top edge
         x = container.offsetLeft + randomPoint;
         y = container.offsetTop;
-        direction = 'up'; // Ensure initial upward bias
+        direction = 'up'; // Ensure upward bias initially
       } else if (randomPoint < container.offsetWidth + container.offsetHeight) { // Right edge
         x = container.offsetLeft + container.offsetWidth;
         y = container.offsetTop + (randomPoint - container.offsetWidth);
@@ -112,27 +112,29 @@
       const grow = setInterval(() => {
         vineLength++;
 
-        // Create a new vine pixel with randomized color
-        const vinePixel = document.createElement('div');
-        vinePixel.classList.add('vine-pixel');
-        vinePixel.style.left = x + 'px';
-        vinePixel.style.top = y + 'px';
+        // Create clusters of vine pixels (thicker vines)
+        for (let i = 0; i < 3; i++) { // Create multiple pixels per step
+          const vinePixel = document.createElement('div');
+          vinePixel.classList.add('vine-pixel');
+          vinePixel.style.left = (x + Math.random() * 4 - 2) + 'px'; // Spread slightly for thickness
+          vinePixel.style.top = (y + Math.random() * 4 - 2) + 'px'; // Spread slightly for thickness
 
-        // Randomize color slightly for each pixel (greenish hues)
-        const colorOffset = Math.floor(Math.random() * 50);
-        vinePixel.style.backgroundColor = `rgb(${74 + colorOffset}, ${112 + colorOffset}, ${35 + colorOffset})`;
+          // Randomize color slightly for each pixel (greenish hues)
+          const colorOffset = Math.floor(Math.random() * 50);
+          vinePixel.style.backgroundColor = `rgb(${54 + colorOffset}, ${92 + colorOffset}, ${15 + colorOffset})`;
 
-        document.body.appendChild(vinePixel);
+          document.body.appendChild(vinePixel);
+        }
 
-        // Move the vine pixel based on current direction
+        // Move the vine pixel based on current direction with outward bias
         if (direction === 'down') {
-          y += 1;
+          y += 2; // Move faster for longer vines
         } else if (direction === 'up') {
-          y -= 1;
+          y -= 2;
         } else if (direction === 'left') {
-          x -= 1;
+          x -= 2;
         } else if (direction === 'right') {
-          x += 1;
+          x += 2;
         }
 
         // Prevent growing under the container
@@ -140,34 +142,43 @@
           x >= containerRect.left && x <= containerRect.right &&
           y >= containerRect.top && y <= containerRect.bottom
         ) {
-          direction = getRandomDirection(direction); // Turn if hitting container
+          direction = getRandomDirection(direction, true); // Turn if hitting container
         }
 
         // Special rule for top vines: turn when reaching the top of the window
         if (direction === 'up' && y <= 0) {
-          direction = getRandomDirection('up');
+          direction = getRandomDirection('up', false);
         }
 
-        // Random turns for erratic growth
-        if (Math.random() < 0.3) {
-          direction = getRandomDirection(direction);
+        // Random turns for erratic growth, with strong outward bias
+        if (Math.random() < 0.2) {
+          direction = getRandomDirection(direction, false); // Occasional erratic turns
         }
 
-        // Stop growing after a certain length
-        if (vineLength > 300) {
+        // Stop growing after a longer length
+        if (vineLength > 500) { // Extended length for longer vines
           clearInterval(grow);
         }
       }, 20);
     }
 
-    function getRandomDirection(currentDirection) {
+    function getRandomDirection(currentDirection, forceTurn = false) {
       // Directions to move in
       const possibleDirections = ['up', 'down', 'left', 'right'];
 
-      // Pick a new direction that's different from the current one
-      let newDirection = currentDirection;
+      // Bias directions based on the current movement (stronger outward growth)
+      if (currentDirection === 'up') {
+        possibleDirections.push('up', 'right', 'left');
+      } else if (currentDirection === 'down') {
+        possibleDirections.push('down', 'right', 'left');
+      } else if (currentDirection === 'left') {
+        possibleDirections.push('left', 'up', 'down');
+      } else if (currentDirection === 'right') {
+        possibleDirections.push('right', 'up', 'down');
+      }
 
-      while (newDirection === currentDirection) {
+      let newDirection = currentDirection;
+      while (newDirection === currentDirection || (forceTurn && newDirection === currentDirection)) {
         newDirection = possibleDirections[Math.floor(Math.random() * possibleDirections.length)];
       }
 
@@ -187,7 +198,7 @@
       <a href="connect.html">Connect</a>
       <a href="other.html">Other</a>
     </div>
-    <p id="lastUpdated">Last updated: 7.9.2024</p>
+    <p id="lastUpdated">Last updated: 9/26/2024</p>
     <p><small>Nothing was harmed in the making of this website.</small></p>
   </div>
 </body>
