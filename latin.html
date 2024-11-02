@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Latin API Fetch Example</title>
+</head>
+<body>
+    <h1>Fetch Latin Vocabulary</h1>
+    <button id="fetch-button">Fetch 'Sleep'</button>
+    <pre id="output"></pre>
+
+    <script>
+        document.getElementById('fetch-button').addEventListener('click', () => {
+            fetch('https://www.latin-is-simple.com/api/vocabulary/search/?query=sleep&forms_only=false', {
+                method: 'GET',
+                headers: {
+                    'accept': 'application/json',
+                    'X-CSRFToken': 'uKB834Lbocnh6Hd6E3qL8beAW5PRjZ16BpZ0hwOXfGRRlkktLorx7ee4PthfdZ9Z'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
+        });
+    </script>
+</body>
+</html>
