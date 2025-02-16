@@ -2,84 +2,50 @@
 <html lang="en">
   <head>
     <title>BokkBokk Site</title>
-    <style>
-      body {
-        background: rgb(0, 0, 0);
-        color: #7cfc00;
-        font-family: "Courier New", monospace;
-        text-align: center;
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-        position: relative;
-        height: 100vh;
-      }
-
-      #container {
-        background: rgba(0, 26, 0, 1);
-        border: 2px solid #4a7023;
-        border-radius: 10px;
-        max-width: 800px;
-        margin: 50px auto;
-        padding: 20px;
-        position: relative;
-        z-index: 1;
-      }
-
-      h1,
-      p,
-      .menu,
-      #image {
-        margin: 20px;
-      }
-
-      .menu {
-        display: flex;
-        justify-content: space-around;
-      }
-
-      .menu a {
-        color: #99ff66;
-        text-decoration: none;
-        padding: 5px 10px;
-        border: 1px solid #4a7023;
-        border-radius: 5px;
-        transition: background 0.3s;
-      }
-
-      .menu a:hover {
-        background: #003300;
-      }
-
-      .vine-pixel {
-        position: absolute;
-        width: 4px; /* Increased size for thicker vines */
-        height: 4px;
-        background-color: #18250b;
-      }
-    </style>
+    <link rel="stylesheet" href="styles.css" />
+    <sciprt src="badge.js"></sciprt>
   </head>
 
   <body>
     <div id="container">
-      <h1>Welcome to BokkBokk's Personal Website</h1>
+      <h1>Welcome.</h1>
       <img
         id="image"
         class="pixelart"
-        src="gif.gif"
+        src="img/gif.gif"
         alt="gif tree swaying"
         width="100"
         height="100"
+        onload="document.getElementById('background-audio').play()"
       />
       <p>I put stuff here sometimes</p>
       <div class="menu">
-        <a href="journal.html">Journal</a>
+        <a href="journal">Journal</a>
         <a href="projects.html">Gallery</a>
-        <a href="connect.html">Connect</a>
+
         <a href="other.html">Other</a>
       </div>
       <p id="lastUpdated">Last updated: 9/26/2024</p>
       <p><small>Nothing was harmed in the making of this website.</small></p>
+
+      <button class="disable" onclick="toggleEffects()">Toggle Effects</button>
+
+      <div id="contact">
+        <a href="https://github.com/bokkbokk" target="_blank">
+          <img id="github" src="github-mark.svg" alt="github logo" />
+        </a>
+      </div>  
     </div>
+    <!-- <audio id="background-audio" autoplay loop>
+      <source src="hum2.mp3" type="audio/mpeg">
+      Your browser does not support the audio element.
+    </audio>
+    <button onclick="document.getElementById('background-audio').play()">Play</button>
+    !-->
+    <script>
+      function toggleEffects() {
+        document.body.classList.toggle('disable-effects');
+      }
+    </script>   
   </body>
 </html>
