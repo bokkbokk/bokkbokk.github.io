@@ -74,7 +74,7 @@ h1, p, .menu, #image {
   background: #003300;
 }
 
-@keyframes flicker {
+@keyframes flickerr {
   0%, 18%, 22%, 25%, 53%, 57%, 100% {
     opacity: 1;
   }
@@ -83,7 +83,7 @@ h1, p, .menu, #image {
   }
 }
 
-@keyframes scanlines {
+@keyframes scanlinesr {
   0% {
     background-position: 0 0;
   }
@@ -126,4 +126,76 @@ h1, p, .menu, #image {
 
 #github:hover {
   filter: invert(74%) sepia(100%) saturate(1000%) hue-rotate(70deg) brightness(150%) contrast(100%);
+}
+
+
+
+@keyframes startup-flicker {
+  0% {
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+  }
+  10% {
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  20% {
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  30% {
+    opacity: 0;
+  }
+  35% {
+    opacity: 1;
+  }
+  40% {
+    opacity: 0;
+  }
+  45% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+  55% {
+    opacity: 1;
+  }
+  60% {
+    opacity: 0;
+  }
+  65% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 0;
+  }
+  75% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 0;
+  }
+  85% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 0;
+  }
+  95% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+body.startup-flicker {
+  animation: startup-flicker 3s linear;
 }

@@ -45,6 +45,13 @@
       function toggleEffects() {
         document.body.classList.toggle('disable-effects');
       }
-    </script>  
+
+      document.addEventListener("DOMContentLoaded", function() {
+        document.body.classList.add('startup-flicker');
+        setTimeout(function() {
+          document.body.classList.remove('startup-flicker');
+        }, 3000); // Duration of the flicker effect
+      });
+    </script> 
   </body>
 </html>
