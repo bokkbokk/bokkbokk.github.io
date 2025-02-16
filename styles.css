@@ -17,6 +17,9 @@ body#journal {
   font-family: "Courier New", monospace;
   overflow: hidden;
   animation: flicker 0.15s infinite, scanlines 0.1s steps(1) infinite;
+  /* 
+  * heyo this just working
+   */
 }
 
 #container {
