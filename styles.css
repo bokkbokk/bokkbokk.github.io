@@ -196,6 +196,6 @@ h1, p, .menu, #image {
   }
 }
 
-body.startup-flicker {
+.startup-flicker {
   animation: startup-flicker 3s linear;
 }
