@@ -2,10 +2,8 @@
 <html lang="en">
   <head>
     <title>BokkBokk Site</title>
-    <link rel="stylesheet" href="styles.css" />
-    
+    <link rel="stylesheet" href="styles.css" />   
   </head>
-
   <body id="main">
     <div id="container">
       <h1>Welcome.</h1>
@@ -50,7 +48,8 @@
         document.body.classList.add('startup-flicker');
         setTimeout(function() {
           document.body.classList.remove('startup-flicker');
-        }, 3000); // Duration of the flicker effect
+          document.body.classList.add('flicker');
+        }, 5000); // Duration of the startup flicker effect
       });
     </script> 
   </body>

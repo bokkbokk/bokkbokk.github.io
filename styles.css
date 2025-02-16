@@ -8,7 +8,7 @@ body#main {
   overflow: hidden;
   position: relative;
   height: 100vh;
-  animation: flicker 0.15s infinite, scanlines 0.1s steps(1) infinite;
+  /*animation: flicker 0.15s infinite, scanlines 0.1s steps(1) infinite;*/
 }
 
 body#journal {
@@ -74,7 +74,7 @@ h1, p, .menu, #image {
   background: #003300;
 }
 
-@keyframes flickerr {
+@keyframes flicker {
   0%, 18%, 22%, 25%, 53%, 57%, 100% {
     opacity: 1;
   }
@@ -83,7 +83,7 @@ h1, p, .menu, #image {
   }
 }
 
-@keyframes scanlinesr {
+@keyframes scanlines {
   0% {
     background-position: 0 0;
   }
@@ -134,61 +134,16 @@ h1, p, .menu, #image {
   0% {
     opacity: 0;
   }
-  5% {
-    opacity: 1;
-  }
-  10% {
+  1% {
     opacity: 0;
   }
-  15% {
+  2% {
     opacity: 1;
   }
-  20% {
+  3% {
     opacity: 0;
   }
-  25% {
-    opacity: 1;
-  }
-  30% {
-    opacity: 0;
-  }
-  35% {
-    opacity: 1;
-  }
-  40% {
-    opacity: 0;
-  }
-  45% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0;
-  }
-  55% {
-    opacity: 1;
-  }
-  60% {
-    opacity: 0;
-  }
-  65% {
-    opacity: 1;
-  }
-  70% {
-    opacity: 0;
-  }
-  75% {
-    opacity: 1;
-  }
-  80% {
-    opacity: 0;
-  }
-  85% {
-    opacity: 1;
-  }
-  90% {
-    opacity: 0;
-  }
-  95% {
+  4% {
     opacity: 1;
   }
   100% {
@@ -197,5 +152,9 @@ h1, p, .menu, #image {
 }
 
 .startup-flicker {
-  animation: startup-flicker 3s linear;
+  animation: startup-flicker 5s linear;
+}
+
+.flicker {
+  animation: flicker 0.15s infinite, scanlines 0.1s steps(1) infinite;
 }
