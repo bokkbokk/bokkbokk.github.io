@@ -3,44 +3,16 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>GuestBook</title>
-  <style>
-    body {
-      font-family: sans-serif;
-    }
-    #chat-container {
-      width: 90%;
-      margin: 0 auto;
-      border: 1px solid #ccc;
-      padding: 10px;
-    }
-    #message-list {
-      height: 300px;
-      overflow-y: scroll;
-      border: 1px solid #ccc;
-      padding: 10px;
-    }
-    .message {
-      margin-bottom: 10px;
-    }
-    .user-message {
-      text-align: right;
-    }
-    .other-message {
-      text-align: left;
-    }
-    .username {
-      font-weight: bold;
-    }
-    @media (max-width: 600px) {
-      #chat-container {
-        width: 100%;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css" />
 </head>
-<body>
+<body id="main">
   <div id="chat-container">
     <h1>The Guest Book</h1>
+    <h4>messages only last 7 days right now</h4>
+    <br>
+    <br>
+    <br>
+    <br>
     <div id="message-list"></div>
     <div>
       <input type="text" id="username" placeholder="Enter your username" />
