@@ -24,9 +24,15 @@ jobs:
       - name: Update last updated date
         run: |
           DATE=$(date +"%m/%d/%y")
-          TECHY_FORMAT="$DATE-($COMMIT_HASH)-$COMMIT_MESSAGE"
-          DATE=$(date +"%m\/%d\/%y")  # Escape slashes in the date
-          sed -i "s|<span id=\"last-updated\">.*</span>|<span id=\"last-updated\">$DATE</span>|" index.html
+          COMMIT_HASH=$(git rev-parse --short HEAD) # Short hash
+          COMMIT_MSG=$(git log -1 --pretty=%s) # First line of commit message
+
+          # Format: MM/DD/YY-(HASH)-Commit message
+          LAST_UPDATED="$DATE-($COMMIT_HASH)-$COMMIT_MSG"
+
+          # Replace content inside <span id="last-updated">
+          sed -i -E "s|(id=\"last-updated\">)[^<]*|\1$LAST_UPDATED|" index.html
+
 
 
 
