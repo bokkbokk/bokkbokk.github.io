@@ -16,7 +16,7 @@ jobs:
       - name: Update last updated date
         run: |
           DATE=$(date +"%m/%d/%Y")
-          sed -i "s/Last updated: .*/Last updated: $DATE<\/p>/" e:/tuckerstuff/Dev/bokkbokk.github.io/bokkbokk.github.io/index.html
+          sed -i "s/Last updated: .*/Last updated: $DATE<\\/p>/" e:/tuckerstuff/Dev/bokkbokk.github.io/bokkbokk.github.io/index.html
 
       - name: Commit changes
         run: |
