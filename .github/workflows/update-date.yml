@@ -25,7 +25,9 @@ jobs:
         run: |
           DATE=$(date +"%m/%d/%y")
           TECHY_FORMAT="$DATE-($COMMIT_HASH)-$COMMIT_MESSAGE"
-          sed -i "s|<span id=\"last-updated\">.*</span>|<span id=\"last-updated\">${TECHY_FORMAT//\//\\/}</span>|" index.html
+          DATE=$(date +"%m\/%d\/%y")  # Escape slashes in the date
+          sed -i "s|<span id=\"last-updated\">.*</span>|<span id=\"last-updated\">$DATE</span>|" index.html
+
 
 
       - name: Commit changes
