@@ -16,11 +16,12 @@ jobs:
       - name: Update last updated date
         run: |
           DATE=$(date +"%m/%d/%Y")
-          sed -i "s/Last updated: .*/Last updated: $DATE<\/p>/" e:/tuckerstuff/Dev/bokkbokk.github.io/bokkbokk.github.io/index.html
+          sed -i "s|Last updated: .*|Last updated: $DATE</p>|" index.html
+
       - name: Commit changes
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add e:/tuckerstuff/Dev/bokkbokk.github.io/bokkbokk.github.io/index.html
-          git commit -m "Update last updated date to $DATE"
+          git add index.html
+          git commit -m "Update last updated date to $DATE" || echo "No changes to commit"
           git push
