@@ -16,16 +16,14 @@ jobs:
       - name: Get commit details
         id: commit_info
         run: |
-          COMMIT_HASH=$(git rev-parse HEAD)
-          COMMIT_MESSAGE=$(git log -1 --pretty=%B)
-          echo "::set-output name=hash::$COMMIT_HASH"
-          echo "::set-output name=message::$COMMIT_MESSAGE"
+          echo "COMMIT_HASH=$(git rev-parse HEAD)" >> $GITHUB_ENV
+          echo "COMMIT_MESSAGE<<EOF" >> $GITHUB_ENV
+          git log -1 --pretty=%B >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
       - name: Update last updated date
         run: |
           DATE=$(date +"%m/%d/%y")
-          COMMIT_HASH=${{ steps.commit_info.outputs.hash }}
-          COMMIT_MESSAGE=${{ steps.commit_info.outputs.message }}
           TECHY_FORMAT="$DATE-($COMMIT_HASH)-$COMMIT_MESSAGE"
           sed -i "s|<span id=\"last-updated\">.*</span>|<span id=\"last-updated\">$TECHY_FORMAT</span>|" index.html
 
