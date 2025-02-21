@@ -31,6 +31,35 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Get commit details
+        id: commit_info
+        run: |
+          echo "COMMIT_HASH=$(git rev-parse HEAD)" >> $GITHUB_ENV
+          echo "COMMIT_MESSAGE<<EOF" >> $GITHUB_ENV
+          git log -1 --pretty=%B >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Update last updated date
+        run: |
+          DATE=$(date +"%m/%d/%y")
+          COMMIT_HASH=$(git rev-parse --short HEAD) # Short hash
+          COMMIT_MSG=$(git log -1 --pretty=%s) # First line of commit message
+
+          # Format: MM/DD/YY-(HASH)-Commit message
+          LAST_UPDATED="$DATE-($COMMIT_HASH)-$COMMIT_MSG"
+
+          # Replace content inside <span id="last-updated">
+          sed -i -E "s|(id=\"last-updated\">)[^<]*|\1$LAST_UPDATED|" index.html
+
+      - name: Commit changes
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git commit -m "Update last updated date to $LAST_UPDATED" || echo "No changes to commit"
+          git push
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
