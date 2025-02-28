@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
     banner.style.padding = "10px";
     banner.style.fontSize = "16px";
     banner.style.zIndex = "1000";
-    banner.innerHTML = "🚀 Big announcement! Check out our latest updates. <a href='#' style='color: #000; text-decoration: underline;'>Learn more</a>";
+    banner.innerHTML = "Latin is better is currently experiencing interruptions, some functions may be slow or unavailable";
     
     // Create close button
     let closeButton = document.createElement("span");
