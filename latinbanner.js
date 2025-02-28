@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
     banner.style.color = "#000";
     banner.style.textAlign = "center";
     banner.style.padding = "10px";
-    banner.style.fontSize = "16px";
+    banner.style.fontSize = "17px";
     banner.style.zIndex = "1000";
     banner.innerHTML = "Latin is better is currently experiencing interruptions, some functions may be slow or unavailable";
     
