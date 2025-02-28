@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
     banner.style.padding = "10px";
     banner.style.fontSize = "17px";
     banner.style.zIndex = "1000";
-    banner.innerHTML = "Latin is better is currently experiencing interruptions, some functions may be slow or unavailable";
+    banner.innerHTML = "Latin is better is currently experiencing interruptions, some functions may be unavailable or slowed";
     
     // Create close button
     let closeButton = document.createElement("span");
