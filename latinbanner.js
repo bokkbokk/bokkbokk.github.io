@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
     banner.style.top = "0";
     banner.style.left = "0";
     banner.style.width = "100%";
-    banner.style.backgroundColor = "#ffcc00";
+    banner.style.backgroundColor = "#bca600";
     banner.style.color = "#000";
     banner.style.textAlign = "center";
     banner.style.padding = "10px";
