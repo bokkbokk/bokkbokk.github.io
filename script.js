@@ -22,7 +22,7 @@ async function getLastCommit() {
         let date = lastCommit.commit.author.date;
         console.log("URL:", lastCommit.html_url);
         let commitUrl = lastCommit.html_url;
-        let out = date + "" + message + "" + sha;
+        let out = date + " - " + message + " - " + sha;
         console.log (out);
         return out;
 
@@ -30,4 +30,7 @@ async function getLastCommit() {
         console.error("Error fetching commit:", error);
     }
 }
-getLastCommit();
+function setMessage(){
+    let message = getLastCommit();
+    document.getElementById("last-updated").innerHTML = message;
+}
