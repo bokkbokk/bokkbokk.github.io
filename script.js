@@ -1,4 +1,5 @@
 function getLastCommit() {
+    console.log("Fetching last commit...");
     const url = `https://api.github.com/repos/bokkbokk/bokkbokk.github.io/commits`;
 
     const request = new XMLHttpRequest();
