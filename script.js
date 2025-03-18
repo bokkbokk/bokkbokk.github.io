@@ -1,13 +1,16 @@
-async function getLastCommit() {
+function getLastCommit() {
     const url = `https://api.github.com/repos/bokkbokk/bokkbokk.github.io/commits`;
 
+    const request = new XMLHttpRequest();
+    request.open('GET', url, false); // false makes the request synchronous
+
     try {
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`GitHub API responded with ${response.status}`);
+        request.send(null);
+        if (request.status !== 200) {
+            throw new Error(`GitHub API responded with ${request.status}`);
         }
-        
-        const commits = await response.json();
+
+        const commits = JSON.parse(request.responseText);
         const lastCommit = commits[0]; // The most recent commit
 
         console.log("Last Commit Info:");
@@ -23,7 +26,7 @@ async function getLastCommit() {
         console.log("URL:", lastCommit.html_url);
         let commitUrl = lastCommit.html_url;
         let out = date + " - " + message + " - " + sha;
-        console.log (out);
+        console.log(out);
         return out;
 
     } catch (error) {
