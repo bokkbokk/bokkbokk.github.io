@@ -21,7 +21,7 @@ async function getLastCommit() {
         console.log("Date:", lastCommit.commit.author.date);
         let date = lastCommit.commit.author.date;
         console.log("URL:", lastCommit.html_url);
-        let url = lastCommit.html_url;
+        let commitUrl = lastCommit.html_url;
         let out = date + "" + message + "" + sha;
         console.log (out);
         return out;
