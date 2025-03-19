@@ -1,6 +1,15 @@
+:root {
+  --background-color: rgb(0, 0, 0);
+  --text-color: #7cfc00;
+  --border-color: #4a7023;
+  --link-color: #99ff66;
+  --hover-background: #003300;
+  --container-background: rgba(0, 26, 0, 1);
+}
+
 body#main {
-  background: rgb(0, 0, 0);
-  color: #7cfc00;
+  background: var(--background-color);
+  color: var(--text-color);
   font-family: "Courier New", monospace;
   text-align: center;
   margin: 0;
@@ -12,8 +21,8 @@ body#main {
 }
 
 body#journal {
-  background: rgb(0, 0, 0);
-  color: #7cfc00;
+  background: var(--background-color);
+  color: var(--text-color);
   font-family: "Courier New", monospace;
   overflow: hidden;
   animation: flicker 0.15s infinite, scanlines 0.1s steps(1) infinite;
@@ -23,8 +32,8 @@ body#journal {
 }
 
 #container {
-  background: rgba(0, 26, 0, 1);
-  border: 2px solid #4a7023;
+  background: var(--container-background);
+  border: 2px solid var(--border-color);
   border-radius: 10px;
   max-width: 800px;
   margin: 50px auto;
@@ -34,8 +43,8 @@ body#journal {
 }
 
 #journal-container {
-  background: rgba(0, 26, 0, 1);
-  border: 2px solid #4a7023;
+  background: var(--container-background);
+  border: 2px solid var(--border-color);
   border-radius: 10px;
   max-width: 800px;
   margin: 1px;
@@ -45,10 +54,10 @@ body#journal {
 
 footer {
   position: absolute;
-  left : 40% ;
+  left: 40%;
   bottom: 0;
   text-align: center;
-  color: #7cfc00;
+  color: var(--text-color);
   font-size: 14px;
 }
 
@@ -62,16 +71,16 @@ h1, p, .menu, #image {
 }
 
 .menu a {
-  color: #99ff66;
+  color: var(--link-color);
   text-decoration: none;
   padding: 5px 10px;
-  border: 1px solid #4a7023;
+  border: 1px solid var(--border-color);
   border-radius: 5px;
   transition: background 0.3s;
 }
 
 .menu a:hover {
-  background: #003300;
+  background: var(--hover-background);
 }
 
 @keyframes flicker {
@@ -97,12 +106,12 @@ h1, p, .menu, #image {
 }
 
 .disable {
-  color: #99ff66;
-  background: rgba(0, 26, 0, 1);
+  color: var(--link-color);
+  background: var(--container-background);
   font-size: 0.6em;
   text-decoration: none;
   padding: 5px 10px;
-  border: 1px solid #4a7023;
+  border: 1px solid var(--border-color);
   border-radius: 5px;
   transition: background 0.3s;
   position: absolute;
@@ -113,7 +122,7 @@ h1, p, .menu, #image {
 
 .disable:hover {
   opacity: 1;
-  background: #003300;
+  background: var(--hover-background);
   transition: opacity 0.3s ease-in-out, background 0.3s ease-in-out;
 }
 
@@ -129,35 +138,37 @@ h1, p, .menu, #image {
 }
 
 #message-list {
-  background: rgba(0, 26, 0, 1);
-  border: 2px solid #4a7023;
+  background: var(--container-background);
+  border: 2px solid var(--border-color);
   border-radius: 10px;
   padding: 20px;
   margin: 10px;
 }
-#last-updated{
+
+#last-updated {
   font-size: small;
 }
+
 input {
-  background: rgba(0, 26, 0, 1);
-  border: 2px solid #4a7023;
+  background: var(--container-background);
+  border: 2px solid var(--border-color);
   border-radius: 10px;
   padding: 10px;
-  color: #7cfc00;
+  color: var(--text-color);
   font-family: "Courier New", monospace;
   margin: 10px;
 }
+
 button {
-  background: rgba(0, 26, 0, 1);
-  border: 2px solid #4a7023;
+  background: var(--container-background);
+  border: 2px solid var(--border-color);
   border-radius: 10px;
   padding: 10px;
-  color: #7cfc00;
+  color: var(--text-color);
   font-family: "Courier New", monospace;
   margin: 10px;
   cursor: pointer;
 }
-
 
 @keyframes startup-flicker {
   0% {
