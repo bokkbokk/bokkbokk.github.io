@@ -1,10 +1,11 @@
 :root {
   --background-color: rgb(0, 0, 0);
-  --text-color: #7cfc00;
+  --text-color: #08e908;
   --border-color: #4a7023;
   --link-color: #99ff66;
   --hover-background: #003300;
-  --container-background: rgba(0, 26, 0, 1);
+  --container-background: rgba(0, 8, 0, 1);
+  /* --container-background: rgba(0, 0, 0, 0.8); */
 }
 
 body#main {
@@ -17,6 +18,9 @@ body#main {
   overflow: hidden;
   position: relative;
   height: 100vh;
+  animation: flicker-blur 0.15s infinite, scanlines 0.1s steps(1) infinite;
+ 
+  
   /*animation: flicker 0.15s infinite, scanlines 0.1s steps(1) infinite;*/
 }
 
@@ -134,7 +138,7 @@ h1, p, .menu, #image {
 }
 
 #github:hover {
-  filter: invert(74%) sepia(100%) saturate(1000%) hue-rotate(70deg) brightness(150%) contrast(100%);
+  filter: invert(74%) sepia(100%) saturate(1000%) hue-rotate(70deg) brightness(300%) contrast(100%);
 }
 
 #message-list {
@@ -196,5 +200,56 @@ button {
 }
 
 .flicker {
-  animation: flicker 0.15s infinite, scanlines 0.1s steps(1) infinite;
+  animation: flicker-blur 0.15s infinite, scanlines 0.1s steps(1) infinite;
 }
+
+
+/* Add the blur animation */
+@-webkit-keyframes blur {
+  0% {
+    -webkit-filter: blur(.1px);
+    opacity: 0.8;
+  }
+  50% {
+    -webkit-filter: blur(.1px);
+    opacity: 1;
+  }
+  100% {
+    -webkit-filter: blur(.1px);
+    opacity: 0.8;
+  }
+}
+
+@keyframes blur {
+  
+  0% {
+    filter: blur(.9px);
+    opacity: 1;
+  }
+  100% {
+    filter: blur(.9px);
+    opacity: 1;
+  }
+}
+
+.blurBtn {
+  animation: blur 0.15s infinite;
+}
+.blurBtn:hover {
+  animation: none;
+  filter: none;
+  transition: filter 0.7s ease-in-out, opacity 0.7s ease-in-out;
+  opacity: 1;
+}
+
+@keyframes flicker-blur {
+  0%, 18%, 22%, 25%, 53%, 57%, 100% {
+    opacity: 1;
+    filter: blur(.6px);
+  }
+  20%, 24%, 55% {
+    opacity: 0.7;
+    filter: blur(.6px);
+  }
+}
+
