@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fetch Roblox Player</title>
+</head>
+<body>
+    <h1>Roblox Player</h1>
+    <div id="video-container">
+        <!-- The video will be appended here -->
+    </div>
+
+    <script>
+        // Function to fetch and render the content
+        fetch('https://cors-anywhere.herokuapp.com/https://now.gg/apps/a/19900/b.html')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.text();
+            })
+            .then(data => {
+                console.log('Fetched data:', data);
+                const videoContainer = document.getElementById('video-container');
+
+                // Create a temporary container to parse the HTML
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = data;
+
+                // Move all child nodes from the temporary container to the video container
+                while (tempDiv.firstChild) {
+                    videoContainer.appendChild(tempDiv.firstChild);
+                }
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+                const videoContainer = document.getElementById('video-container');
+                videoContainer.innerHTML = '<p>Failed to load content. Please try again later.</p>';
+            });
+    </script>
+</body>
+</html>
