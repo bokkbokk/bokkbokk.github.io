@@ -1,22 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-
-    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-7QBB7JMRTC"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-7QBB7JMRTC');
-</script>
+    <script
+      data-goatcounter="https://bokkbokk.goatcounter.com/count"
+      async
+      src="//gc.zgo.at/count.js"
+    ></script>
 
     <meta charset="UTF-8" />
     <title>PHOSIMP SCRIPTS</title>
   </head>
   <body>
-
     <h1>Download Scripts</h1>
 
     <button onclick="downloadFile('script1.zip')">Download Script 1</button>
@@ -34,11 +28,7 @@
         document.body.removeChild(link);
       }
       function trackDownload(fileName) {
-        gtag("event", "download", {
-          event_category: "Scripts",
-          event_label: fileName,
-        });
-        //window.location.href = `scriptFiles/${fileName}`;
+        //////
       }
     </script>
   </body>
