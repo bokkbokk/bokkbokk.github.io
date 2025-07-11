@@ -25,11 +25,35 @@
     <link rel="stylesheet" href="/styles.css">
   </head>
   <body id="main">
-    <h1>Download Scripts</h1>
+    <div id="container">
+    <h1>Download My PHOSIMP Scripts!</h1>
 
+    <div id="mainscripts">
+      <button onclick="//downloadFile('recipe.zip')">Main Recipe Script</button>
+      <p class="descript">
+        this is the main recipe / kinda everything script. it lets you save + load filters, edit and manage recipes, other misc stuff, and includes everything below. it also uses whatever recipe you have selected when making videos.
+      </p>
+      <p>its not done yet, but im almost there :D </p>
+    </div>
+
+
+
+    <div id="standalone">
     <button onclick="downloadFile('video.zip')">Standalone PHOSIMP video script</button>
-    <button onclick="downloadFile('loadJpg.ahk')">Standalone Jpg + any type of image loader</button>
-    <button onclick="downloadFile('randomImage.ahk')">Standalone Random Image from <a href="picsum.photos">lorem picsum</a></button>
+    <button onclick="downloadFile('loadJpg.ahk')">Standalone Jpg(+more) loader</button>
+    <button onclick="downloadFile('randomImage.ahk')">Standalone Random Image from lorem picsum</button>
+    <p>These are ready to download!</p>
+    </div>
+    </div>
+
+
+
+
+
+
+
+
+
 
     <script>
       function downloadFile(fileName) {
