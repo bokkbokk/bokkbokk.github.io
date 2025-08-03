@@ -29,11 +29,11 @@
     <h1>Download My PHOSIMP Scripts!</h1>
 
     <div id="mainscripts">
-      <button onclick="downloadFile('recipeScript101.zip')">Main Recipe Script</button>
+      <button id="mainRecipeBtn">Main Recipe Script</button>
       <p class="descript">
         this is the main recipe / kinda everything script. it lets you save + load filters, edit and manage recipes, other misc stuff, and includes everything below. it also uses whatever recipe you have selected when making videos.
       </p>
-      <p>Done now! kinda, ill keep adding to it, this is version 1</p>
+      <p id="versionText">Done now! kinda, ill keep adding to it, this is version ...</p>
     </div>
 
 
@@ -60,6 +60,18 @@
 
 
     <script>
+      let vernum = "";
+
+      // Fetch the version number from recipever.txt
+      fetch('recipever.txt')
+        .then(response => response.text())
+        .then(text => {
+          vernum = text.trim();
+          // Update the version 
+          document.getElementById('versionText').textContent =
+            `Done now! kinda, ill keep adding to it, this is version ${vernum}`;
+        });
+
       function downloadFile(fileName) {
         trackDownload(fileName);
         const link = document.createElement("a");
@@ -70,8 +82,17 @@
         document.body.removeChild(link);
       }
       function trackDownload(fileName) {
-        //////
+        //////i want to see how many people download this but its too much work rn 
       }
+
+      // Attach event listener to the main recipe button
+      document.getElementById('mainRecipeBtn').addEventListener('click', function() {
+        if (vernum) {
+          downloadFile('recipeScript' + vernum + '.zip');
+        } else {
+          alert('Version number not loaded yet. Please try again in a moment.');
+        }
+      });
     </script>
   </body>
 </html>
