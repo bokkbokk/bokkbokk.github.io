@@ -68,8 +68,8 @@
         .then(text => {
           vernum = text.trim();
           // Update the version 
-          document.getElementById('versionText').textContent =
-            `Done now! kinda, ill keep adding to it, this is version ${vernum}`;
+          document.getElementById('versionText').innerHTML =
+            `Done now! kinda, ill keep adding to it, this is version <strong style="color:pink">${vernum}</strong>`;
         });
 
       function downloadFile(fileName) {
