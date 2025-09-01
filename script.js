@@ -3,7 +3,7 @@ function getLastCommit() {
     const url = `https://api.github.com/repos/bokkbokk/bokkbokk.github.io/commits`;
 
     const request = new XMLHttpRequest();
-    request.open('GET', url, false); // false makes the request synchronous
+    request.open('GET', url, false); //  synchronous
 
     try {
         request.send(null);
