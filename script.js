@@ -12,7 +12,7 @@ function getLastCommit() {
         }
 
         const commits = JSON.parse(request.responseText);
-        const lastCommit = commits[0]; // The most recent commit
+        const lastCommit = commits[0];
 
         console.log("Last Commit Info:");
         console.log("SHA:", lastCommit.sha);
